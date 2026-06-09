@@ -48,20 +48,6 @@ export default function Home() {
     fetchFeed()
   })
 
-  const postTypeLabel = (type?: number) => {
-    switch (type) {
-      case 0: return 'General'
-      case 1: return 'Text'
-      case 2: return 'Image'
-      case 3: return 'Video'
-      case 4: return 'Audio'
-      case 5: return 'Link'
-      case 6: return 'Poll'
-      case 7: return 'Quote'
-      default: return 'Post'
-    }
-  }
-
   const handleSignOut = () => {
     setCurrentUser(null)
     sessionStorage.removeItem('user')
@@ -89,36 +75,81 @@ export default function Home() {
           return (
             <div class="feed">
               {items.map((post) => (
-                <div class="feed-card">
-                  <div class="feed-card-header">
-                    <span class="feed-card-blog">{post.blogName}</span>
-                    <span class="feed-card-type">{postTypeLabel(post.type)}</span>
-                    {post.createdAtUnix && (
-                      <span class="feed-card-time">
-                        {new Date(post.createdAtUnix * 1000).toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  {post.title && <div class="feed-card-title">{post.title}</div>}
-                  {post.body && <div class="feed-card-body">{post.body}</div>}
-                  {post.tags && post.tags.length > 0 && (
-                    <div class="feed-card-tags">
-                      {post.tags.map((t) => (
-                        <span class="tag">{t}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div class="feed-card-meta">
-                    <span>❤ {post.likesCount ?? 0}</span>
-                    <span>💬 {post.commentsCount ?? 0}</span>
-                    <span>🔁 {post.reblogsCount ?? 0}</span>
-                  </div>
-                </div>
+                <PostCard post={post} />
               ))}
             </div>
           )
         })()}
       </main>
+    </div>
+  )
+}
+
+function PostCard(props: { post: Post }) {
+  const post = props.post
+
+  const postTypeLabel = (type?: number) => {
+    switch (type) {
+      case 0: return 'General'
+      case 1: return 'Text'
+      case 2: return 'Image'
+      case 3: return 'Video'
+      case 4: return 'Audio'
+      case 5: return 'Link'
+      case 6: return 'Poll'
+      case 7: return 'Quote'
+      default: return 'Post'
+    }
+  }
+
+  const imageUrls = () => {
+    const c = post.content
+    if (!c) return []
+    if (c.files && c.files.length > 0) return c.files
+    if (c.thumbnail) return [c.thumbnail]
+    return []
+  }
+
+  return (
+    <div class="feed-card">
+      <div class="feed-card-header">
+        <span class="feed-card-blog">{post.blogName}</span>
+        <span class="feed-card-type">{postTypeLabel(post.type)}</span>
+        {post.createdAtUnix && (
+          <span class="feed-card-time">
+            {new Date(post.createdAtUnix * 1000).toLocaleString()}
+          </span>
+        )}
+      </div>
+      {post.title && <div class="feed-card-title">{post.title}</div>}
+      {post.body && <div class="feed-card-body">{post.body}</div>}
+      {imageUrls().length > 0 && (
+        <div class="feed-card-images">
+          {imageUrls().map((url) => (
+            <img
+              src={url}
+              alt=""
+              loading="lazy"
+              onError={(e) => {
+                const el = e.currentTarget
+                el.style.display = 'none'
+              }}
+            />
+          ))}
+        </div>
+      )}
+      {post.tags && post.tags.length > 0 && (
+        <div class="feed-card-tags">
+          {post.tags.map((t) => (
+            <span class="tag">{t}</span>
+          ))}
+        </div>
+      )}
+      <div class="feed-card-meta">
+        <span>❤ {post.likesCount ?? 0}</span>
+        <span>💬 {post.commentsCount ?? 0}</span>
+        <span>🔁 {post.reblogsCount ?? 0}</span>
+      </div>
     </div>
   )
 }

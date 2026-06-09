@@ -83,6 +83,17 @@ export function listBlogsRecentActivity(blogIds: number[], pageSize = 20) {
   })
 }
 
+export interface PostContent {
+  files?: string[]
+  thumbnail?: string
+  html?: string
+  text?: string
+  title?: string
+  url?: string
+  quoteText?: string
+  quoteSource?: string
+}
+
 export interface Post {
   id: number
   blogId?: number
@@ -90,6 +101,7 @@ export interface Post {
   type?: number
   title?: string
   body?: string
+  content?: PostContent
   tags?: string[]
   likesCount?: number
   commentsCount?: number
@@ -116,4 +128,9 @@ export interface ListBlogActivityResponse {
 
 export function listBlogActivity(req: ListBlogActivityRequest) {
   return request<ListBlogActivityResponse>(API_BASE, '/list-blog-activity', req)
+}
+
+export async function signUrl(url: string): Promise<string> {
+  const data = await request<{ url?: string }>(API_BASE, '/sign-url', { url })
+  return data.url || url
 }
