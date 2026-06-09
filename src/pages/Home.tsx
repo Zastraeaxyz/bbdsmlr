@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from 'solid-js'
-import { useNavigate } from '@solidjs/router'
+import { useNavigate, A } from '@solidjs/router'
 import { requireUser, setCurrentUser, listBlogActivity, type Post } from '../lib/api'
 
 export default function Home() {
@@ -149,6 +149,7 @@ function PostCard(props: { post: Post }) {
         <span>❤ {post.likesCount ?? 0}</span>
         <span>💬 {post.commentsCount ?? 0}</span>
         <span>🔁 {post.reblogsCount ?? 0}</span>
+        <A href={`/post/${post.id}`} class="feed-card-permalink">Permalink</A>
       </div>
     </div>
   )

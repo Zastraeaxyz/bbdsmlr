@@ -134,3 +134,12 @@ export async function signUrl(url: string): Promise<string> {
   const data = await request<{ url?: string }>(API_BASE, '/sign-url', { url })
   return data.url || url
 }
+
+export interface GetPostDetailResponse {
+  post?: Post
+  error?: string
+}
+
+export function getPostDetail(postId: number) {
+  return request<GetPostDetailResponse>(API_BASE, '/get-post-detail', { post_id: postId })
+}
