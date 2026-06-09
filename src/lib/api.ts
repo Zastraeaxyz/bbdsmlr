@@ -82,3 +82,38 @@ export function listBlogsRecentActivity(blogIds: number[], pageSize = 20) {
     page: { page_size: pageSize },
   })
 }
+
+export interface Post {
+  id: number
+  blogId?: number
+  blogName?: string
+  type?: number
+  title?: string
+  body?: string
+  tags?: string[]
+  likesCount?: number
+  commentsCount?: number
+  reblogsCount?: number
+  createdAtUnix?: number
+}
+
+export interface ListBlogActivityRequest {
+  blog_id: number
+  sort_field?: number
+  order?: number
+  post_types?: number[]
+  activity_kinds?: string[]
+  page?: { page_size?: number }
+  page_size?: number
+}
+
+export interface ListBlogActivityResponse {
+  posts?: Post[]
+  timelineItems?: { type: number; post?: Post }[]
+  page?: { nextPageToken?: string }
+  error?: string
+}
+
+export function listBlogActivity(req: ListBlogActivityRequest) {
+  return request<ListBlogActivityResponse>(API_BASE, '/list-blog-activity', req)
+}

@@ -1,6 +1,6 @@
-import { createSignal, createMemo } from 'solid-js'
+import { createSignal, createEffect } from 'solid-js'
 import { useNavigate } from '@solidjs/router'
-import { requireUser, setCurrentUser, resolveIdentifier, listBlogsRecentActivity } from '../lib/api'
+import { requireUser, setCurrentUser, listBlogActivity, type Post } from '../lib/api'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -13,45 +13,53 @@ export default function Home() {
     return null
   }
 
-  const [blogName, setBlogName] = createSignal('')
-  const [rows, setRows] = createSignal<
-    { blogName?: string; latestPostId?: number; latestCreatedAtUnix?: number }[]
-  >()
-  const [resolvedName, setResolvedName] = createSignal('')
+  const blogId = user.blog_id ?? user.primary_blog_id
+  if (!blogId) {
+    navigate('/login', { replace: true })
+    return null
+  }
+
+  const [posts, setPosts] = createSignal<Post[]>()
+  const [loading, setLoading] = createSignal(true)
   const [error, setError] = createSignal('')
-  const [loading, setLoading] = createSignal(false)
 
-  const handleFetch = async () => {
-    const name = blogName().trim()
-    if (!name) return
-
+  const fetchFeed = async () => {
     setLoading(true)
     setError('')
-    setRows(undefined)
-    setResolvedName('')
-
     try {
-      const resolved = await resolveIdentifier(name)
-      const blogId = resolved.blogId
-      if (!blogId) {
-        setError('Could not resolve blog name to an ID')
-        return
-      }
-      setResolvedName(resolved.blogName ?? name)
-
-      const data = await listBlogsRecentActivity([blogId])
-      setRows(data.items ?? [])
+      const data = await listBlogActivity({
+        blog_id: blogId,
+        sort_field: 1,
+        order: 2,
+        post_types: [1, 2, 3, 4, 5, 6, 7],
+        activity_kinds: ['like', 'comment'],
+        page: { page_size: 12 },
+        page_size: 12,
+      })
+      setPosts(data.posts ?? [])
     } catch (err: unknown) {
-      setError((err as Error)?.message || 'Request failed')
+      setError((err as Error)?.message || 'Failed to load feed')
     } finally {
       setLoading(false)
     }
   }
 
-  const items = createMemo(() => rows())
+  createEffect(() => {
+    fetchFeed()
+  })
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') handleFetch()
+  const postTypeLabel = (type?: number) => {
+    switch (type) {
+      case 0: return 'General'
+      case 1: return 'Text'
+      case 2: return 'Image'
+      case 3: return 'Video'
+      case 4: return 'Audio'
+      case 5: return 'Link'
+      case 6: return 'Poll'
+      case 7: return 'Quote'
+      default: return 'Post'
+    }
   }
 
   const handleSignOut = () => {
@@ -70,52 +78,44 @@ export default function Home() {
         </button>
       </header>
       <main>
-        <div class="search-box">
-          <input
-            type="text"
-            placeholder="Enter a blog name (e.g. testblog)"
-            value={blogName()}
-            onInput={(e) => setBlogName(e.currentTarget.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button onClick={handleFetch} disabled={loading() || !blogName().trim()}>
-            {loading() ? 'Loading…' : 'Fetch activity'}
-          </button>
-        </div>
-
         {error() && <p class="error">{error()}</p>}
 
-        {resolvedName() && (
-          <div class="resolve-info">Resolved blog: <strong>{resolvedName()}</strong></div>
-        )}
+        {loading() && <p class="loading">Loading feed…</p>}
 
         {(() => {
-          const data = items()
-          if (!data) return null
-          if (data.length === 0) return <p class="empty">No recent activity found.</p>
+          const items = posts()
+          if (!items || loading()) return null
+          if (items.length === 0) return <p class="empty">No posts in feed.</p>
           return (
-            <table>
-              <thead>
-                <tr>
-                  <th>Blog</th>
-                  <th>Latest Post ID</th>
-                  <th>Timestamp</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((item) => (
-                  <tr>
-                    <td>{item.blogName}</td>
-                    <td class="mono">{item.latestPostId ?? '—'}</td>
-                    <td class="mono">
-                      {item.latestCreatedAtUnix
-                        ? new Date(Number(item.latestCreatedAtUnix) * 1000).toLocaleString()
-                        : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div class="feed">
+              {items.map((post) => (
+                <div class="feed-card">
+                  <div class="feed-card-header">
+                    <span class="feed-card-blog">{post.blogName}</span>
+                    <span class="feed-card-type">{postTypeLabel(post.type)}</span>
+                    {post.createdAtUnix && (
+                      <span class="feed-card-time">
+                        {new Date(post.createdAtUnix * 1000).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {post.title && <div class="feed-card-title">{post.title}</div>}
+                  {post.body && <div class="feed-card-body">{post.body}</div>}
+                  {post.tags && post.tags.length > 0 && (
+                    <div class="feed-card-tags">
+                      {post.tags.map((t) => (
+                        <span class="tag">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div class="feed-card-meta">
+                    <span>❤ {post.likesCount ?? 0}</span>
+                    <span>💬 {post.commentsCount ?? 0}</span>
+                    <span>🔁 {post.reblogsCount ?? 0}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           )
         })()}
       </main>
