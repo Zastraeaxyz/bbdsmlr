@@ -1,0 +1,84 @@
+const API_BASE = '/v2/api'
+const AUTH_BASE = '/v2/api/auth'
+
+export interface AuthUser {
+  user_id: number
+  blog_id: number | null
+  blog_name?: string | null
+  username?: string | null
+  blogs?: { id: number; name: string; user_id?: number }[]
+  primary_blog_id?: number | null
+  email?: string
+}
+
+let currentUser: AuthUser | null = null
+
+export function getCurrentUser(): AuthUser | null {
+  return currentUser
+}
+
+export function setCurrentUser(user: AuthUser | null) {
+  currentUser = user
+}
+
+export function requireUser(): AuthUser {
+  const user = currentUser || JSON.parse(sessionStorage.getItem('user') || 'null')
+  if (!user) throw new Error('Not authenticated')
+  currentUser = user
+  return user
+}
+
+export interface ResolveIdentifierResponse {
+  blogId?: number
+  blogName?: string
+  postId?: number | null
+  userId?: number
+  userName?: string | null
+  error?: string
+}
+
+export interface RecentActivityItem {
+  blogId?: number
+  blogName?: string
+  latestPostId?: number
+  latestCreatedAtUnix?: number
+}
+
+export interface ListBlogsRecentActivityResponse {
+  items?: RecentActivityItem[]
+  posts?: unknown[]
+  page?: { nextPageToken?: string }
+  error?: string
+}
+
+async function request<T>(base: string, path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${base}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }))
+    throw new Error(err.message || err.error || `HTTP ${res.status}`)
+  }
+
+  return res.json()
+}
+
+export function login(login: string, password: string, remember = false) {
+  return request<AuthUser>(AUTH_BASE, '/login', { login, password, remember })
+}
+
+export function resolveIdentifier(blogName: string) {
+  return request<ResolveIdentifierResponse>(API_BASE, '/resolve-identifier', { blog_name: blogName })
+}
+
+export function listBlogsRecentActivity(blogIds: number[], pageSize = 20) {
+  return request<ListBlogsRecentActivityResponse>(API_BASE, '/list-blogs-recent-activity', {
+    blog_ids: blogIds,
+    global_merge: true,
+    page: { page_size: pageSize },
+  })
+}
