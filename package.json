@@ -6,13 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "swagger:fetch": "./scripts/fetch-swagger.sh",
+    "swagger:generate": "swagger-typescript-api generate -p src/lib/api/openapi.json -o src/lib/api -n client.ts --modular --axios",
+    "swagger:update": "npm run swagger:fetch && npm run swagger:generate"
   },
   "dependencies": {
     "solid-js": "^1.9.12"
   },
   "devDependencies": {
     "@types/node": "^24.12.3",
+    "swagger-typescript-api": "^13.12.2",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
     "vite-plugin-solid": "^2.11.12"
