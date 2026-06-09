@@ -126,15 +126,23 @@ function PostCard(props: { post: Post }) {
       {imageUrls().length > 0 && (
         <div class="feed-card-images">
           {imageUrls().map((url) => (
-            <img
-              src={url}
-              alt=""
-              loading="lazy"
-              onError={(e) => {
-                const el = e.currentTarget
-                el.style.display = 'none'
-              }}
-            />
+            <div class="media-shell">
+              <img
+                src={url}
+                alt=""
+                loading="lazy"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
+              />
+              <video
+                src={url}
+                muted
+                playsinline
+                controls
+                loop
+                preload="metadata"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
+              />
+            </div>
           ))}
         </div>
       )}

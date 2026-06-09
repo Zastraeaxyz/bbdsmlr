@@ -109,7 +109,23 @@ function PostDetail(props: { post: Post }) {
       {imageUrls().length > 0 && (
         <div class="post-detail-images">
           {imageUrls().map((url) => (
-            <img src={url} alt="" />
+            <div class="media-shell">
+              <img
+                src={url}
+                alt=""
+                loading="lazy"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
+              />
+              <video
+                src={url}
+                muted
+                playsinline
+                controls
+                loop
+                preload="metadata"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
+              />
+            </div>
           ))}
         </div>
       )}
