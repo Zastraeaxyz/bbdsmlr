@@ -7,6 +7,7 @@ import {
   listBlogTopTags,
   getBlog,
   PostType,
+  PostVariant,
   type Post,
   type TopTag,
   type Blog,
@@ -18,6 +19,7 @@ import {
 } from "../lib/sanitize";
 import Header from "../components/Header";
 import SearchHelp from "../components/SearchHelp";
+import { ReblogAttribution } from "../components/ReblogAttribution";
 
 const PAGE_SIZE = 20;
 
@@ -295,6 +297,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
           </span>
         )}
       </div>
+      <ReblogAttribution originBlogName={post.originBlogName} variant={post.variant} />
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {contentHtml() && (
         <div class="feed-card-body" innerHTML={contentHtml()!} />

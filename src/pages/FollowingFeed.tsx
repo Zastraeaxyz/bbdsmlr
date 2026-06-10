@@ -1,9 +1,10 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { A } from '@solidjs/router'
-import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, type Post } from '../lib/api'
+import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '../lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
 import Header from '../components/Header'
 import SearchHelp from '../components/SearchHelp'
+import { ReblogAttribution } from '../components/ReblogAttribution'
 
 export default function FollowingFeed() {
   const user = getCurrentUser()
@@ -227,6 +228,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
           </span>
         )}
       </div>
+      <ReblogAttribution originBlogName={post.originBlogName} variant={post.variant} />
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {contentHtml() && <div class="feed-card-body" innerHTML={contentHtml()!} />}
       {post.type !== PostType.Text && imageUrls().length > 0 && (

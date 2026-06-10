@@ -118,6 +118,12 @@ export const PostType = {
   Quote: 7,
 } as const
 
+export const PostVariant = {
+  Unspecified: 0,
+  Original: 1,
+  Reblog: 2,
+} as const
+
 export interface PostContent {
   files?: string[]
   thumbnail?: string
@@ -142,6 +148,11 @@ export interface Post {
   commentsCount?: number
   reblogsCount?: number
   createdAtUnix?: number
+  originPostId?: number
+  originBlogId?: number
+  originBlogName?: string
+  variant?: number
+  reblogVariants?: { id: number; blogName: string }[]
 }
 
 export interface ListBlogActivityRequest {

@@ -1,8 +1,9 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
-import { getCurrentUser, getPostDetail, PostType, type Post } from '../lib/api'
+import { getCurrentUser, getPostDetail, PostType, PostVariant, type Post } from '../lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
 import Header from '../components/Header'
+import { ReblogAttribution } from '../components/ReblogAttribution'
 
 export default function PostPage() {
   const params = useParams()
@@ -94,6 +95,8 @@ function PostDetail(props: { post: Post }) {
         )}
       </div>
 
+      <ReblogAttribution originBlogName={p.originBlogName} variant={p.variant} />
+
       {p.title && <h2 class="post-detail-title">{p.title}</h2>}
       {contentHtml() && <div class="post-detail-body" innerHTML={contentHtml()!} />}
 
@@ -125,9 +128,9 @@ function PostDetail(props: { post: Post }) {
 
       {p.tags && p.tags.length > 0 && (
         <div class="post-detail-tags">
-          {p.tags.map((t) => (
+          <For each={p.tags}>{(t) => (
             <span class="tag">#{t}</span>
-          ))}
+          )}</For>
         </div>
       )}
 

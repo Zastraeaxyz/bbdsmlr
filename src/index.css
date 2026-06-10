@@ -384,6 +384,17 @@ button:disabled {
   font-size: 13px;
 }
 
+.reblog-attribution {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.reblog-attribution a {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
 .feed-card-blog {
   font-weight: 600;
   color: var(--accent);
