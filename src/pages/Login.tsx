@@ -31,15 +31,23 @@ export default function Login() {
         <h1>BDSMLR</h1>
         <p class="subtitle">Sign in to your account</p>
         {error() && <p class="error">{error()}</p>}
+        <label for="login" class="visually-hidden">Email or username</label>
         <input
-          type="email"
-          placeholder="Email"
+          id="login"
+          name="login"
+          type="text"
+          autocomplete="username"
+          placeholder="Email or username"
           value={email()}
           onInput={(e) => setEmail(e.currentTarget.value)}
           required
         />
+        <label for="password" class="visually-hidden">Password</label>
         <input
+          id="password"
+          name="password"
           type="password"
+          autocomplete="current-password"
           placeholder="Password"
           value={password()}
           onInput={(e) => setPassword(e.currentTarget.value)}
