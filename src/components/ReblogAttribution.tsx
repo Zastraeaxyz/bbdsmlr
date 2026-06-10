@@ -13,8 +13,8 @@ export function ReblogAttribution(props: ReblogAttributionProps) {
     <Show when={props.variant === PostVariant.Reblog && props.originBlogName && props.originPostId}>
       <div class="reblog-attribution">
         ↻ reblogged from{' '}
-        <A href={`/${props.originBlogName}/post/${props.originPostId}`}>
-          {props.originBlogName}
+        <A href={`/post/${props.originPostId}`}>
+          {props.originBlogName}'s post
         </A>
       </div>
     </Show>
