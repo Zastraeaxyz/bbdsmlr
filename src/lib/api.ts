@@ -111,11 +111,12 @@ export interface Post {
 
 export interface ListBlogActivityRequest {
   blog_id: number
+  blog_name?: string
   sort_field?: number
   order?: number
   post_types?: number[]
   activity_kinds?: string[]
-  page?: { page_size?: number }
+  page?: number
   page_size?: number
 }
 

@@ -1,18 +1,11 @@
 import { createSignal, createEffect } from 'solid-js'
-import { useNavigate, useParams } from '@solidjs/router'
-import { requireUser, getPostDetail, type Post } from '../lib/api'
+import { useNavigate, useParams, A } from '@solidjs/router'
+import { getCurrentUser, setCurrentUser, getPostDetail, type Post } from '../lib/api'
 
 export default function PostPage() {
   const navigate = useNavigate()
   const params = useParams()
-
-  let user: ReturnType<typeof requireUser>
-  try {
-    user = requireUser()
-  } catch {
-    navigate('/login', { replace: true })
-    return
-  }
+  const user = getCurrentUser()
 
   const [post, setPost] = createSignal<Post | null>(null)
   const [loading, setLoading] = createSignal(true)
@@ -39,19 +32,27 @@ export default function PostPage() {
       .finally(() => setLoading(false))
   })
 
+  const handleSignOut = () => {
+    setCurrentUser(null)
+    setPost(null)
+    setError('')
+    sessionStorage.removeItem('user')
+    navigate('/login', { replace: true })
+  }
+
   return (
     <div class="home-page">
       <header>
         <h1>BDSMLR</h1>
-        <span class="user-info">{user.blog_name || user.username}</span>
-        <button class="btn-ghost" onClick={() => navigate('/')}>
-          Back
-        </button>
-        <button class="btn-ghost" onClick={() => {
-          setPost(null), setError(''), sessionStorage.removeItem('user'), navigate('/login', { replace: true })
-        }}>
-          Sign out
-        </button>
+        <span class="user-info">{user?.blog_name || user?.username}</span>
+        <A href="/" class="btn-ghost">Home</A>
+        {user && (
+          <>
+            <A href={`/${user.blog_name}`} class="btn-ghost">My feed</A>
+            <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
+          </>
+        )}
+        {!user && <A href="/login" class="btn-ghost">Sign in</A>}
       </header>
       <main>
         {error() && <p class="error">{error()}</p>}
@@ -94,7 +95,7 @@ function PostDetail(props: { post: Post }) {
   return (
     <article class="post-detail">
       <div class="post-detail-header">
-        <span class="post-detail-blog">{p.blogName}</span>
+        <A href={`/${p.blogName}`} class="post-detail-blog">{p.blogName}</A>
         <span class="feed-card-type">{postTypeLabel(p.type)}</span>
         {p.createdAtUnix && (
           <span class="post-detail-time">

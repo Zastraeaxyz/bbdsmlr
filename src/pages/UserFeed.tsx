@@ -1,40 +1,41 @@
 import { createSignal, createEffect } from 'solid-js'
-import { useNavigate, A } from '@solidjs/router'
-import { requireUser, setCurrentUser, listBlogActivity, type Post } from '../lib/api'
+import { useNavigate, useParams, A } from '@solidjs/router'
+import { getCurrentUser, setCurrentUser, resolveIdentifier, listBlogActivity, type Post } from '../lib/api'
 
-export default function Home() {
+export default function UserFeed() {
   const navigate = useNavigate()
+  const params = useParams()
+  const slug = () => params.user
 
-  let user: ReturnType<typeof requireUser>
-  try {
-    user = requireUser()
-  } catch {
-    navigate('/login', { replace: true })
-    return null
-  }
-
-  const blogId = user.blog_id ?? user.primary_blog_id
-  if (!blogId) {
-    navigate('/login', { replace: true })
-    return null
-  }
+  const user = getCurrentUser()
 
   const [posts, setPosts] = createSignal<Post[]>()
   const [loading, setLoading] = createSignal(true)
   const [error, setError] = createSignal('')
 
   const fetchFeed = async () => {
+    const name = slug()
+    if (!name) {
+      setError('No user specified')
+      return
+    }
     setLoading(true)
     setError('')
     try {
+      const resolved = await resolveIdentifier(name)
+      if (!resolved.blogId) {
+        setError(resolved.error || 'User not found')
+        return
+      }
       const data = await listBlogActivity({
-        blog_id: blogId,
+        blog_id: resolved.blogId,
+        blog_name: resolved.blogName || name,
         sort_field: 1,
         order: 2,
         post_types: [1, 2, 3, 4, 5, 6, 7],
-        activity_kinds: ['like', 'comment'],
-        page: { page_size: 12 },
-        page_size: 12,
+        activity_kinds: ['post', 'reblog'],
+        page: 1,
+        page_size: 20,
       })
       setPosts(data.posts ?? [])
     } catch (err: unknown) {
@@ -58,10 +59,14 @@ export default function Home() {
     <div class="home-page">
       <header>
         <h1>BDSMLR</h1>
-        <span class="user-info">{user.blog_name || user.username}</span>
-        <button class="btn-ghost" onClick={handleSignOut}>
-          Sign out
-        </button>
+        <span class="user-info">{slug()}</span>
+        {user && (
+          <>
+            <A href={`/${user.blog_name}`} class="btn-ghost">My feed</A>
+            <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
+          </>
+        )}
+        {!user && <A href="/login" class="btn-ghost">Sign in</A>}
       </header>
       <main>
         {error() && <p class="error">{error()}</p>}
@@ -113,7 +118,7 @@ function PostCard(props: { post: Post }) {
   return (
     <div class="feed-card">
       <div class="feed-card-header">
-        <span class="feed-card-blog">{post.blogName}</span>
+        <A href={`/${post.blogName}`} class="feed-card-blog">{post.blogName}</A>
         <span class="feed-card-type">{postTypeLabel(post.type)}</span>
         {post.createdAtUnix && (
           <span class="feed-card-time">
