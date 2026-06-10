@@ -1,7 +1,7 @@
 import { createSignal, createEffect } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
 import { getCurrentUser, getPostDetail, PostType, type Post } from '../lib/api'
-import { sanitizeHtml, processContentHtml } from '../lib/sanitize'
+import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
 import Header from '../components/Header'
 
 export default function PostPage() {
@@ -72,8 +72,8 @@ function PostDetail(props: { post: Post }) {
   const imageUrls = () => {
     const c = p.content
     if (!c) return []
-    if (c.files && c.files.length > 0) return c.files
-    if (c.thumbnail) return [c.thumbnail]
+    if (c.files && c.files.length > 0) return c.files.map(transformMediaUrl)
+    if (c.thumbnail) return [transformMediaUrl(c.thumbnail)]
     return []
   }
 
