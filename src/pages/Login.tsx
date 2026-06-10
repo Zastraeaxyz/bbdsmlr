@@ -1,29 +1,29 @@
-import { createSignal } from 'solid-js'
-import { useNavigate } from '@solidjs/router'
-import { login, setCurrentUser } from '../lib/api'
+import { createSignal } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { login, setCurrentUser } from "../lib/api";
 
 export default function Login() {
-  const navigate = useNavigate()
-  const [email, setEmail] = createSignal('')
-  const [password, setPassword] = createSignal('')
-  const [error, setError] = createSignal('')
-  const [loading, setLoading] = createSignal(false)
+  const navigate = useNavigate();
+  const [email, setEmail] = createSignal("");
+  const [password, setPassword] = createSignal("");
+  const [error, setError] = createSignal("");
+  const [loading, setLoading] = createSignal(false);
 
   const handleSubmit = async (e: Event) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      const user = await login(email(), password(), true)
-      setCurrentUser(user)
-      localStorage.setItem('user', JSON.stringify(user))
-      navigate(`/${user.blog_name}`, { replace: true })
+      const user = await login(email(), password(), true);
+      setCurrentUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
+      navigate(`/${user.blog_name}`, { replace: true });
     } catch (err: unknown) {
-      setError((err as Error)?.message || 'Login failed')
+      setError((err as Error)?.message || "Login failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div class="login-page">
@@ -31,32 +31,36 @@ export default function Login() {
         <h1>BDSMLR</h1>
         <p class="subtitle">Sign in to your account</p>
         {error() && <p class="error">{error()}</p>}
-        <label for="login" class="visually-hidden">Email or username</label>
+        <label for="login" class="visually-hidden">
+          Email or username
+        </label>
         <input
           id="login"
           name="login"
           type="text"
-          autocomplete="username"
+          autocomplete="off"
           placeholder="Email or username"
           value={email()}
           onInput={(e) => setEmail(e.currentTarget.value)}
           required
         />
-        <label for="password" class="visually-hidden">Password</label>
+        <label for="password" class="visually-hidden">
+          Password
+        </label>
         <input
           id="password"
           name="password"
           type="password"
-          autocomplete="current-password"
+          autocomplete="off"
           placeholder="Password"
           value={password()}
           onInput={(e) => setPassword(e.currentTarget.value)}
           required
         />
         <button type="submit" disabled={loading()}>
-          {loading() ? 'Signing in…' : 'Sign in'}
+          {loading() ? "Signing in…" : "Sign in"}
         </button>
       </form>
     </div>
-  )
+  );
 }
