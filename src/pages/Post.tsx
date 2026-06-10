@@ -95,7 +95,7 @@ function PostDetail(props: { post: Post }) {
         )}
       </div>
 
-      <ReblogAttribution originBlogName={p.originBlogName} variant={p.variant} />
+      <ReblogAttribution originBlogName={p.originBlogName} originPostId={p.originPostId} variant={p.variant} />
 
       {p.title && <h2 class="post-detail-title">{p.title}</h2>}
       {contentHtml() && <div class="post-detail-body" innerHTML={contentHtml()!} />}

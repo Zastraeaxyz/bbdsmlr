@@ -302,7 +302,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
           </span>
         )}
       </div>
-      <ReblogAttribution originBlogName={post.originBlogName} variant={post.variant} />
+      <ReblogAttribution originBlogName={post.originBlogName} originPostId={post.originPostId} variant={post.variant} />
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {contentHtml() && (
         <div class="feed-card-body" innerHTML={contentHtml()!} />
