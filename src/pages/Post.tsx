@@ -4,6 +4,7 @@ import { getCurrentUser, getPostDetail, PostType, PostVariant, type Post } from 
 import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
 import Header from '../components/Header'
 import { ReblogAttribution } from '../components/ReblogAttribution'
+import { LightBox } from '../components/LightBox'
 
 export default function PostPage() {
   const params = useParams()
@@ -12,6 +13,7 @@ export default function PostPage() {
   const [post, setPost] = createSignal<Post | null>(null)
   const [loading, setLoading] = createSignal(true)
   const [error, setError] = createSignal('')
+  const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null)
 
   createEffect(() => {
     const postId = Number(params.id)
@@ -44,14 +46,15 @@ export default function PostPage() {
         {error() && <p class="error">{error()}</p>}
         {loading() && <p class="loading">Loading post…</p>}
         <Show when={!loading() && post()}>
-          <PostDetail post={post()!} />
+          <PostDetail post={post()!} onImageClick={setLightboxUrl} />
         </Show>
       </main>
+      <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </div>
   )
 }
 
-function PostDetail(props: { post: Post }) {
+function PostDetail(props: { post: Post; onImageClick?: (url: string) => void }) {
   const p = props.post
 
   const postTypeLabel = (type?: number) => {
@@ -98,7 +101,12 @@ function PostDetail(props: { post: Post }) {
       <ReblogAttribution originBlogName={p.originBlogName} originPostId={p.originPostId} variant={p.variant} />
 
       {p.title && <h2 class="post-detail-title">{p.title}</h2>}
-      {contentHtml() && <div class="post-detail-body" innerHTML={contentHtml()!} />}
+      {contentHtml() && <div class="post-detail-body" innerHTML={contentHtml()!} onClick={(e) => {
+        const target = e.target as HTMLElement
+        if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
+          props.onImageClick?.(target.getAttribute('src')!)
+        }
+      }} />}
 
       {p.type !== PostType.Text && imageUrls().length > 0 && (
         <div class="post-detail-images">
@@ -109,6 +117,7 @@ function PostDetail(props: { post: Post }) {
                   src={url}
                   alt=""
                   loading="lazy"
+                  onClick={() => props.onImageClick?.(url)}
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
                 <video
@@ -118,6 +127,7 @@ function PostDetail(props: { post: Post }) {
                   controls
                   loop
                   preload="metadata"
+                  onClick={() => props.onImageClick?.(url)}
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               </div>

@@ -5,6 +5,7 @@ import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sani
 import Header from '../components/Header'
 import SearchHelp from '../components/SearchHelp'
 import { ReblogAttribution } from '../components/ReblogAttribution'
+import { LightBox } from '../components/LightBox'
 
 export default function FollowingFeed() {
   const user = getCurrentUser()
@@ -16,6 +17,7 @@ export default function FollowingFeed() {
   const [error, setError] = createSignal('')
   const [query, setQuery] = createSignal('')
   const [activeQuery, setActiveQuery] = createSignal('')
+  const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null)
   const [sortField, setSortField] = createSignal(1)
   const [sortOrder, setSortOrder] = createSignal(1)
   let page = 1
@@ -165,7 +167,7 @@ export default function FollowingFeed() {
         <Show when={!loading()}>
           <Show when={posts().length > 0} fallback={<p class="empty">{activeQuery() ? 'No results found.' : 'No posts from followed blogs.'}</p>}>
             <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} />}</For>
+              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
             </div>
           </Show>
         </Show>
@@ -181,11 +183,12 @@ export default function FollowingFeed() {
           </button>
         )}
       </main>
+      <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </div>
   )
 }
 
-function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
+function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onImageClick?: (url: string) => void }) {
   const post = props.post
 
   const postTypeLabel = (type?: number) => {
@@ -230,7 +233,12 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
       </div>
       <ReblogAttribution originBlogName={post.originBlogName} originPostId={post.originPostId} variant={post.variant} />
       {post.title && <div class="feed-card-title">{post.title}</div>}
-      {contentHtml() && <div class="feed-card-body" innerHTML={contentHtml()!} />}
+      {contentHtml() && <div class="feed-card-body" innerHTML={contentHtml()!} onClick={(e) => {
+        const target = e.target as HTMLElement
+        if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
+          props.onImageClick?.(target.getAttribute('src')!)
+        }
+      }} />}
       {post.type !== PostType.Text && imageUrls().length > 0 && (
         <div class="feed-card-images">
           <For each={imageUrls()}>
@@ -240,6 +248,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
                   src={url}
                   alt=""
                   loading="lazy"
+                  onClick={() => props.onImageClick?.(url)}
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
                 <video
@@ -249,6 +258,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
                   controls
                   loop
                   preload="metadata"
+                  onClick={() => props.onImageClick?.(url)}
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               </div>

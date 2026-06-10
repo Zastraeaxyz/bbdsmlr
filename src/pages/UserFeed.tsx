@@ -20,6 +20,7 @@ import {
 import Header from "../components/Header";
 import SearchHelp from "../components/SearchHelp";
 import { ReblogAttribution } from "../components/ReblogAttribution";
+import { LightBox } from "../components/LightBox";
 
 const PAGE_SIZE = 20;
 
@@ -38,6 +39,7 @@ export default function UserFeed() {
   const [error, setError] = createSignal("");
   const [query, setQuery] = createSignal("");
   const [activeQuery, setActiveQuery] = createSignal("");
+  const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
 
   let resolvedId: number | null = null;
   let page = 1;
@@ -225,7 +227,7 @@ export default function UserFeed() {
         <Show when={!loading()}>
           <Show when={posts().length > 0} fallback={<p class="empty">No posts in feed.</p>}>
             <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} />}</For>
+              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
             </div>
           </Show>
         </Show>
@@ -241,11 +243,12 @@ export default function UserFeed() {
           </button>
         )}
       </main>
+      <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </div>
   );
 }
 
-function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
+function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onImageClick?: (url: string) => void }) {
   const post = props.post;
 
   const postTypeLabel = (type?: number) => {
@@ -305,7 +308,12 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
       <ReblogAttribution originBlogName={post.originBlogName} originPostId={post.originPostId} variant={post.variant} />
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {contentHtml() && (
-        <div class="feed-card-body" innerHTML={contentHtml()!} />
+        <div class="feed-card-body" innerHTML={contentHtml()!} onClick={(e) => {
+          const target = e.target as HTMLElement;
+          if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
+            props.onImageClick?.(target.getAttribute('src')!);
+          }
+        }} />
       )}
       {post.type !== PostType.Text && imageUrls().length > 0 && (
         <div class="feed-card-images">
@@ -316,6 +324,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
                   src={url}
                   alt=""
                   loading="lazy"
+                  onClick={() => props.onImageClick?.(url)}
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
@@ -327,6 +336,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
                   controls
                   loop
                   preload="metadata"
+                  onClick={() => props.onImageClick?.(url)}
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
