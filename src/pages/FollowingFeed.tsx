@@ -118,6 +118,7 @@ function PostCard(props: { post: Post }) {
       </div>
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {post.body && <div class="feed-card-body">{post.body}</div>}
+      {post.content?.html && <div class="feed-card-body" innerHTML={post.content.html} />}
       {imageUrls().length > 0 && (
         <div class="feed-card-images">
           {imageUrls().map((url) => (

@@ -106,6 +106,7 @@ function PostDetail(props: { post: Post }) {
 
       {p.title && <h2 class="post-detail-title">{p.title}</h2>}
       {p.body && <div class="post-detail-body">{p.body}</div>}
+      {p.content?.html && <div class="post-detail-body" innerHTML={p.content.html} />}
 
       {imageUrls().length > 0 && (
         <div class="post-detail-images">
@@ -134,7 +135,7 @@ function PostDetail(props: { post: Post }) {
       {p.tags && p.tags.length > 0 && (
         <div class="post-detail-tags">
           {p.tags.map((t) => (
-            <span class="tag">{t}</span>
+            <span class="tag">#{t}</span>
           ))}
         </div>
       )}
