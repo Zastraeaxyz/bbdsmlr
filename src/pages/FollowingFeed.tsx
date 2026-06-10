@@ -1,6 +1,7 @@
 import { createSignal, createEffect } from 'solid-js'
 import { A } from '@solidjs/router'
 import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, type Post } from '../lib/api'
+import { sanitizeHtml } from '../lib/sanitize'
 import Header from '../components/Header'
 
 export default function FollowingFeed() {
@@ -103,8 +104,7 @@ function PostCard(props: { post: Post }) {
         )}
       </div>
       {post.title && <div class="feed-card-title">{post.title}</div>}
-      {post.body && <div class="feed-card-body">{post.body}</div>}
-      {post.content?.html && <div class="feed-card-body" ref={el => el.innerHTML = post.content!.html!} />}
+      {post.content?.html && <div class="feed-card-body" innerHTML={sanitizeHtml(post.content!.html!)} />}
       {imageUrls().length > 0 && (
         <div class="feed-card-images">
           {imageUrls().map((url) => (
