@@ -17,6 +17,7 @@ import {
   transformMediaUrl,
 } from "../lib/sanitize";
 import Header from "../components/Header";
+import SearchHelp from "../components/SearchHelp";
 
 const PAGE_SIZE = 20;
 
@@ -33,15 +34,19 @@ export default function UserFeed() {
   const [loadingMore, setLoadingMore] = createSignal(false);
   const [hasMore, setHasMore] = createSignal(true);
   const [error, setError] = createSignal("");
+  const [query, setQuery] = createSignal("");
+  const [activeQuery, setActiveQuery] = createSignal("");
 
   let resolvedId: number | null = null;
   let page = 1;
 
   const loadPage = async (name: string) => {
     if (!resolvedId) return;
+    const q = activeQuery();
     const data = await listBlogActivity({
       blog_id: resolvedId,
       blog_name: name,
+      ...(q ? { q } : {}),
       sort_field: 1,
       order: 2,
       post_types: [1, 2, 3, 4, 5, 6, 7],
@@ -107,6 +112,40 @@ export default function UserFeed() {
     }
   };
 
+  const doSearch = (e: Event) => {
+    e.preventDefault();
+    const name = slug();
+    if (!name) return;
+    setActiveQuery(query());
+    page = 1;
+    setPosts([]);
+    setHasMore(true);
+    loadPage(name);
+  };
+
+  const clearSearch = () => {
+    const name = slug();
+    if (!name) return;
+    setQuery("");
+    setActiveQuery("");
+    page = 1;
+    setPosts([]);
+    setHasMore(true);
+    loadPage(name);
+  };
+
+  const handleTagClick = (tag: string) => {
+    const name = slug();
+    if (!name) return;
+    const q = (query() ? query() + " " : "") + `tag:${tag}`;
+    setQuery(q);
+    setActiveQuery(q);
+    page = 1;
+    setPosts([]);
+    setHasMore(true);
+    loadPage(name);
+  };
+
   return (
     <div class="home-page">
       <Header info={slug()}>
@@ -143,10 +182,10 @@ export default function UserFeed() {
             <div class="top-tags-list">
               <For each={topTags().slice(0, 5)}>
                 {(t) => (
-                  <span class="tag">
+                  <button type="button" class="tag" onClick={() => handleTagClick(t.name)}>
                     <span class="tag-name">{t.name}</span>
                     <span class="tag-count">{t.postsCount}</span>
-                  </span>
+                  </button>
                 )}
               </For>
             </div>
@@ -154,6 +193,24 @@ export default function UserFeed() {
         </section>
       )}
       <main>
+        <form class="search-bar" onSubmit={doSearch}>
+          <div class="search-input-wrap">
+            <input
+              type="text"
+              placeholder="Search posts…"
+              value={query()}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+            />
+            {activeQuery() && (
+              <button type="button" class="search-input-clear" onClick={clearSearch}>
+                ×
+              </button>
+            )}
+          </div>
+          <button type="submit">Search</button>
+          <SearchHelp onFill={(q) => { const name = slug(); if (!name) return; setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage(name); }} />
+        </form>
+
         {error() && <p class="error">{error()}</p>}
 
         {loading() && <p class="loading">Loading feed…</p>}
@@ -161,7 +218,7 @@ export default function UserFeed() {
         <Show when={!loading()}>
           <Show when={posts().length > 0} fallback={<p class="empty">No posts in feed.</p>}>
             <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} />}</For>
+              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} />}</For>
             </div>
           </Show>
         </Show>
@@ -181,7 +238,7 @@ export default function UserFeed() {
   );
 }
 
-function PostCard(props: { post: Post }) {
+function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
   const post = props.post;
 
   const postTypeLabel = (type?: number) => {
@@ -273,9 +330,11 @@ function PostCard(props: { post: Post }) {
       )}
       {post.tags && post.tags.length > 0 && (
         <div class="feed-card-tags">
-          {post.tags.map((t) => (
-            <span class="tag">#{t}</span>
-          ))}
+          <For each={post.tags}>{(t) => (
+            <button type="button" class="tag" onClick={() => props.onTagClick?.(t)}>
+              #{t}
+            </button>
+          )}</For>
         </div>
       )}
       <div class="feed-card-meta">

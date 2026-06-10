@@ -10,5 +10,6 @@ If a new API quirk has been discovered, please document it here in #API Quirks s
 
 - Login response is **snake_case** (`blog_id`, `blog_name`, `user_id`).
 - `resolveIdentifier` returns **camelCase** (`blogId`, `blogName`).
-- `listBlogActivity` request fields are **snake_case**; `page` is an integer, not `{ page_size }`; `activity_kinds` uses `['post', 'reblog']`.
+- `listBlogActivity` request fields are **snake_case**; `page` is an integer, not `{ page_size }`; `activity_kinds` uses `['post', 'reblog']`; the search query is `q`.
+- `searchPostsByTag` request field is **snake_case** `tag_name` (same query syntax as `listBlogActivity`'s `q`).
 - `.gif` files may be served as `video/mp4`. Render each URL in a `.media-shell` (CSS grid overlapping) with both `<img>` and `<video muted controls>`. Each hides on `onError`. For `.gif`-as-video, the `<video>` gets `autoplay loop playsinline`; for other videos, `autoplay`/`loop`/`playsinline` are omitted so the video starts muted but does not autoplay.

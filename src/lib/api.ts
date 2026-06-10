@@ -147,6 +147,7 @@ export interface Post {
 export interface ListBlogActivityRequest {
   blog_id: number
   blog_name?: string
+  q?: string
   sort_field?: number
   order?: number
   post_types?: number[]
@@ -164,6 +165,22 @@ export interface ListBlogActivityResponse {
 
 export function listBlogActivity(req: ListBlogActivityRequest) {
   return request<ListBlogActivityResponse>(API_BASE, '/list-blog-activity', req)
+}
+
+export interface SearchPostsByTagRequest {
+  tag_name: string
+  page?: number
+  page_size?: number
+}
+
+export interface SearchPostsByTagResponse {
+  posts?: Post[]
+  page?: { nextPageToken?: string }
+  error?: string
+}
+
+export function searchPostsByTag(req: SearchPostsByTagRequest) {
+  return request<SearchPostsByTagResponse>(API_BASE, '/search-posts-by-tag', req)
 }
 
 export async function signUrl(url: string): Promise<string> {

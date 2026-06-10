@@ -1,25 +1,31 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { A } from '@solidjs/router'
-import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, PostType, type Post } from '../lib/api'
+import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, type Post } from '../lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
 import Header from '../components/Header'
+import SearchHelp from '../components/SearchHelp'
 
 export default function FollowingFeed() {
   const user = getCurrentUser()
 
   const [posts, setPosts] = createSignal<Post[]>([])
   const [loading, setLoading] = createSignal(true)
+  const [loadingMore, setLoadingMore] = createSignal(false)
+  const [hasMore, setHasMore] = createSignal(true)
   const [error, setError] = createSignal('')
+  const [query, setQuery] = createSignal('')
+  const [activeQuery, setActiveQuery] = createSignal('')
+  let page = 1
 
-  const fetchFollowingFeed = async () => {
-    if (!user?.blog_id) {
-      setError('Not authenticated')
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    setError('')
-    try {
+  const loadPage = async () => {
+    const q = activeQuery()
+    if (q) {
+      const data = await searchPostsByTag({ tag_name: q, page, page_size: 20 })
+      const incoming = data.posts ?? []
+      setPosts((prev) => [...prev, ...incoming])
+      if (incoming.length < 20) setHasMore(false)
+    } else {
+      if (!user?.blog_id) return
       const graph = await blogFollowGraph(user.blog_id)
       const following = graph.following || []
       if (following.length === 0) {
@@ -29,6 +35,23 @@ export default function FollowingFeed() {
       const blogIds = following.map((f) => Number(f.blogId))
       const data = await listBlogsRecentActivity(blogIds, 20)
       setPosts(data.posts ?? [])
+    }
+  }
+
+  const fetchFeed = async () => {
+    if (!user?.blog_id) {
+      setError('Not authenticated')
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setLoadingMore(false)
+    setError('')
+    setPosts([])
+    setHasMore(true)
+    page = 1
+    try {
+      await loadPage()
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Failed to load feed')
     } finally {
@@ -37,8 +60,49 @@ export default function FollowingFeed() {
   }
 
   createEffect(() => {
-    fetchFollowingFeed()
+    fetchFeed()
   })
+
+  const loadMore = async () => {
+    if (!hasMore() || loadingMore()) return
+    setLoadingMore(true)
+    page++
+    try {
+      await loadPage()
+    } catch {
+      page--
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
+  const doSearch = (e: Event) => {
+    e.preventDefault()
+    setActiveQuery(query())
+    page = 1
+    setPosts([])
+    setHasMore(true)
+    loadPage()
+  }
+
+  const clearSearch = () => {
+    setQuery('')
+    setActiveQuery('')
+    page = 1
+    setPosts([])
+    setHasMore(true)
+    fetchFeed()
+  }
+
+  const handleTagClick = (tag: string) => {
+    const q = (query() ? query() + ' ' : '') + `tag:${tag}`
+    setQuery(q)
+    setActiveQuery(q)
+    page = 1
+    setPosts([])
+    setHasMore(true)
+    loadPage()
+  }
 
   return (
     <div class="home-page">
@@ -46,23 +110,52 @@ export default function FollowingFeed() {
         {user && <A href={`/${user.blog_name}`} class="btn-ghost">My blog</A>}
       </Header>
       <main>
+        <form class="search-bar" onSubmit={doSearch}>
+          <div class="search-input-wrap">
+            <input
+              type="text"
+              placeholder="Search posts…"
+              value={query()}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+            />
+            {activeQuery() && (
+              <button type="button" class="search-input-clear" onClick={clearSearch}>
+                ×
+              </button>
+            )}
+          </div>
+          <button type="submit">Search</button>
+          <SearchHelp onFill={(q) => { setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage() }} />
+        </form>
+
         {error() && <p class="error">{error()}</p>}
 
         {loading() && <p class="loading">Loading feed…</p>}
 
         <Show when={!loading()}>
-          <Show when={posts().length > 0} fallback={<p class="empty">No posts from followed blogs.</p>}>
+          <Show when={posts().length > 0} fallback={<p class="empty">{activeQuery() ? 'No results found.' : 'No posts from followed blogs.'}</p>}>
             <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} />}</For>
+              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} />}</For>
             </div>
           </Show>
         </Show>
+
+        {hasMore() && !loading() && (
+          <button
+            onClick={loadMore}
+            disabled={loadingMore()}
+            class="btn-ghost"
+            style="display:block;margin:24px auto"
+          >
+            {loadingMore() ? 'Loading…' : 'Load more'}
+          </button>
+        )}
       </main>
     </div>
   )
 }
 
-function PostCard(props: { post: Post }) {
+function PostCard(props: { post: Post; onTagClick?: (tag: string) => void }) {
   const post = props.post
 
   const postTypeLabel = (type?: number) => {
@@ -134,9 +227,11 @@ function PostCard(props: { post: Post }) {
       )}
       {post.tags && post.tags.length > 0 && (
         <div class="feed-card-tags">
-          {post.tags.map((t) => (
-            <span class="tag">#{t}</span>
-          ))}
+          <For each={post.tags}>{(t) => (
+            <button type="button" class="tag" onClick={() => props.onTagClick?.(t)}>
+              #{t}
+            </button>
+          )}</For>
         </div>
       )}
       <div class="feed-card-meta">

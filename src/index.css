@@ -182,18 +182,132 @@ button:disabled {
   margin: 0 auto;
 }
 
-.search-box {
+.search-bar {
   display: flex;
   gap: 8px;
   margin-bottom: 20px;
+  position: relative;
 }
 
-.search-box input {
+.search-input-wrap {
   flex: 1;
+  position: relative;
 }
 
-.search-box button {
+.search-input-wrap input {
+  width: 100%;
+  padding-right: 36px;
+}
+
+.search-input-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.search-input-clear:hover {
+  color: var(--text);
+}
+
+.search-bar > button[type="submit"] {
   white-space: nowrap;
+}
+
+.search-help {
+  position: relative;
+  display: flex;
+}
+
+.search-help-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-help-btn:hover {
+  color: var(--text-heading);
+  border-color: var(--accent);
+}
+
+.search-help-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 400px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.search-help-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin-bottom: 4px;
+}
+
+.search-help-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.search-help-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-help-example {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-help-example:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.search-help-example code {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.search-help-example span {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .resolve-info {
@@ -400,6 +514,12 @@ button:disabled {
   border-radius: 20px;
   padding: 3px 10px;
   line-height: 1.4;
+  cursor: pointer;
+}
+
+.tag:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
 }
 
 .tag-name {
