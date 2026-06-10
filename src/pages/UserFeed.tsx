@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup } from 'solid-js'
+import { createSignal, createEffect } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
 import { getCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, type Post, type TopTag } from '../lib/api'
 import Header from '../components/Header'
@@ -20,7 +20,6 @@ export default function UserFeed() {
 
   let resolvedId: number | null = null
   let page = 1
-  let sentinel: HTMLDivElement | undefined
 
   const loadPage = async (name: string) => {
     if (!resolvedId) return
@@ -72,20 +71,6 @@ export default function UserFeed() {
 
   createEffect(() => {
     fetchFeed()
-  })
-
-  createEffect(() => {
-    const el = sentinel
-    if (!el || !hasMore()) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting || loadingMore() || !hasMore()) return
-        loadMore()
-      },
-      { rootMargin: '400px' },
-    )
-    observer.observe(el)
-    onCleanup(() => observer.disconnect())
   })
 
   const loadMore = async () => {
@@ -143,7 +128,11 @@ export default function UserFeed() {
         {loadingMore() && <p class="loading">Loading more…</p>}
 
         {hasMore() && !loading() && (
-          <div ref={(el) => { sentinel = el }} class="sentinel" />
+          <div class="load-more-wrap">
+            <button onClick={loadMore} disabled={loadingMore()} class="btn load-more">
+              {loadingMore() ? 'Loading…' : 'Load more'}
+            </button>
+          </div>
         )}
       </main>
     </div>
@@ -197,15 +186,20 @@ function PostCard(props: { post: Post }) {
                 src={url}
                 alt=""
                 loading="lazy"
+                ref={(el) => { el.style.display = 'none' }}
+                onLoad={(e) => { e.currentTarget.style.display = '' }}
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
               <video
                 src={url}
-                muted
-                playsinline
                 controls
-                loop
+                muted
+                playsinline={url.endsWith('.gif') || undefined}
+                loop={url.endsWith('.gif') || undefined}
+                autoplay={url.endsWith('.gif') || undefined}
                 preload="metadata"
+                ref={(el) => { el.style.display = 'none' }}
+                onLoadedData={(e) => { e.currentTarget.style.display = '' }}
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
             </div>

@@ -100,15 +100,20 @@ function PostDetail(props: { post: Post }) {
                 src={url}
                 alt=""
                 loading="lazy"
+                ref={(el) => { el.style.display = 'none' }}
+                onLoad={(e) => { e.currentTarget.style.display = '' }}
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
               <video
                 src={url}
-                muted
-                playsinline
                 controls
-                loop
+                muted
+                playsinline={url.endsWith('.gif') || undefined}
+                loop={url.endsWith('.gif') || undefined}
+                autoplay={url.endsWith('.gif') || undefined}
                 preload="metadata"
+                ref={(el) => { el.style.display = 'none' }}
+                onLoadedData={(e) => { e.currentTarget.style.display = '' }}
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
             </div>
