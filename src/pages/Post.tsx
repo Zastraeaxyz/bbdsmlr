@@ -36,7 +36,7 @@ export default function PostPage() {
     setCurrentUser(null)
     setPost(null)
     setError('')
-    sessionStorage.removeItem('user')
+    localStorage.removeItem('user')
     navigate('/login', { replace: true })
   }
 

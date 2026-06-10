@@ -16,7 +16,7 @@ export default function Login() {
     try {
       const user = await login(email(), password(), true)
       setCurrentUser(user)
-      sessionStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('user', JSON.stringify(user))
       navigate(`/${user.blog_name}`, { replace: true })
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Login failed')

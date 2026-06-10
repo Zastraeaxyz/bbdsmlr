@@ -22,7 +22,7 @@ export function setCurrentUser(user: AuthUser | null) {
 }
 
 export function requireUser(): AuthUser {
-  const user = currentUser || JSON.parse(sessionStorage.getItem('user') || 'null')
+  const user = currentUser || JSON.parse(localStorage.getItem('user') || 'null')
   if (!user) throw new Error('Not authenticated')
   currentUser = user
   return user

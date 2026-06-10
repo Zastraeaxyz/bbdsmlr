@@ -51,7 +51,7 @@ export default function UserFeed() {
 
   const handleSignOut = () => {
     setCurrentUser(null)
-    sessionStorage.removeItem('user')
+    localStorage.removeItem('user')
     navigate('/login', { replace: true })
   }
 
