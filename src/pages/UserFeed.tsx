@@ -56,6 +56,10 @@ export default function UserFeed() {
       page,
       page_size: PAGE_SIZE,
     });
+    if (data.error) {
+      const msg = data.error === "blog not found" ? "Blog was banned" : data.error;
+      throw new Error(msg);
+    }
     const incoming = data.posts ?? [];
     setPosts((prev) => [...prev, ...incoming]);
     if (incoming.length < PAGE_SIZE) setHasMore(false);
@@ -107,8 +111,9 @@ export default function UserFeed() {
     page++;
     try {
       await loadPage(name);
-    } catch {
+    } catch (err: unknown) {
       page--;
+      setError((err as Error)?.message || "Failed to load more");
     } finally {
       setLoadingMore(false);
     }
