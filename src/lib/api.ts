@@ -46,9 +46,33 @@ export interface RecentActivityItem {
 
 export interface ListBlogsRecentActivityResponse {
   items?: RecentActivityItem[]
-  posts?: unknown[]
+  posts?: Post[]
   page?: { nextPageToken?: string }
   error?: string
+}
+
+export interface FollowEdge {
+  blogId: string
+  blogName: string
+  userId?: string
+}
+
+export interface BlogFollowGraphResponse {
+  blogId?: string
+  blogName?: string
+  followers?: FollowEdge[]
+  following?: FollowEdge[]
+  followersCount?: number
+  followingCount?: number
+  nextPageToken?: string
+  error?: string
+}
+
+export function blogFollowGraph(blogId: number) {
+  return request<BlogFollowGraphResponse>(API_BASE, '/blog-follow-graph', {
+    blogId: String(blogId),
+    direction: 'following',
+  })
 }
 
 async function request<T>(base: string, path: string, body: unknown): Promise<T> {
@@ -144,3 +168,21 @@ export interface GetPostDetailResponse {
 export function getPostDetail(postId: number) {
   return request<GetPostDetailResponse>(API_BASE, '/get-post-detail', { post_id: postId })
 }
+
+export interface TopTag {
+  tag: string
+  count: number
+}
+
+export interface ListBlogTopTagsResponse {
+  tags?: TopTag[]
+  error?: string
+}
+
+export function listBlogTopTags(blogName: string, pageSize = 150) {
+  return request<ListBlogTopTagsResponse>(API_BASE, '/list-blog-top-tags', {
+    blog_name: blogName,
+    page_size: pageSize,
+  })
+}
+

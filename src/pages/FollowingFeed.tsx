@@ -1,47 +1,33 @@
 import { createSignal, createEffect } from 'solid-js'
-import { useNavigate, useParams, A } from '@solidjs/router'
-import { getCurrentUser, setCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, type Post, type TopTag } from '../lib/api'
+import { useNavigate, A } from '@solidjs/router'
+import { getCurrentUser, setCurrentUser, blogFollowGraph, listBlogsRecentActivity, type Post } from '../lib/api'
 
-export default function UserFeed() {
+export default function FollowingFeed() {
   const navigate = useNavigate()
-  const params = useParams()
-  const slug = () => params.user
-
   const user = getCurrentUser()
 
-  const [posts, setPosts] = createSignal<Post[]>()
-  const [topTags, setTopTags] = createSignal<TopTag[]>([])
+  const [posts, setPosts] = createSignal<Post[]>([])
   const [loading, setLoading] = createSignal(true)
   const [error, setError] = createSignal('')
 
-  const fetchFeed = async () => {
-    const name = slug()
-    if (!name) {
-      setError('No user specified')
+  const fetchFollowingFeed = async () => {
+    if (!user?.blog_id) {
+      setError('Not authenticated')
+      setLoading(false)
       return
     }
     setLoading(true)
     setError('')
     try {
-      const resolved = await resolveIdentifier(name)
-      if (!resolved.blogId) {
-        setError(resolved.error || 'User not found')
+      const graph = await blogFollowGraph(user.blog_id)
+      const following = graph.following || []
+      if (following.length === 0) {
+        setPosts([])
         return
       }
-      const data = await listBlogActivity({
-        blog_id: resolved.blogId,
-        blog_name: resolved.blogName || name,
-        sort_field: 1,
-        order: 2,
-        post_types: [1, 2, 3, 4, 5, 6, 7],
-        activity_kinds: ['post', 'reblog'],
-        page: 1,
-        page_size: 20,
-      })
+      const blogIds = following.map((f) => Number(f.blogId))
+      const data = await listBlogsRecentActivity(blogIds, 20)
       setPosts(data.posts ?? [])
-
-      const tagsRes = await listBlogTopTags(name)
-      setTopTags(tagsRes.tags ?? [])
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Failed to load feed')
     } finally {
@@ -50,7 +36,7 @@ export default function UserFeed() {
   }
 
   createEffect(() => {
-    fetchFeed()
+    fetchFollowingFeed()
   })
 
   const handleSignOut = () => {
@@ -63,22 +49,15 @@ export default function UserFeed() {
     <div class="home-page">
       <header>
         <h1>BDSMLR</h1>
-        <span class="user-info">{slug()}</span>
+        <span class="user-info">Following feed</span>
         {user && (
           <>
-            <A href="/following" class="btn-ghost">Following</A>
+            <A href={`/${user.blog_name}`} class="btn-ghost">My blog</A>
             <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
           </>
         )}
         {!user && <A href="/login" class="btn-ghost">Sign in</A>}
       </header>
-      {topTags().length > 0 && (
-        <section class="top-tags">
-          {topTags().map((t) => (
-            <span class="tag">#{t.tag} ({t.count})</span>
-          ))}
-        </section>
-      )}
       <main>
         {error() && <p class="error">{error()}</p>}
 
@@ -86,8 +65,8 @@ export default function UserFeed() {
 
         {(() => {
           const items = posts()
-          if (!items || loading()) return null
-          if (items.length === 0) return <p class="empty">No posts in feed.</p>
+          if (loading()) return null
+          if (!items || items.length === 0) return <p class="empty">No posts from followed blogs.</p>
           return (
             <div class="feed">
               {items.map((post) => (

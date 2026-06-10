@@ -1,9 +1,40 @@
 import { createSignal } from "solid-js";
-import { useNavigate } from "@solidjs/router";
-import { login, setCurrentUser } from "../lib/api";
+import { useNavigate, A } from "@solidjs/router";
+import { getCurrentUser, setCurrentUser, login } from "../lib/api";
+
+function getStoredUser() {
+  let user = getCurrentUser();
+  if (!user) {
+    try { user = JSON.parse(localStorage.getItem("user") || "null") } catch {}
+  }
+  return user;
+}
 
 export default function Login() {
   const navigate = useNavigate();
+  const user = getStoredUser();
+
+  if (user) {
+    const handleSignOut = () => {
+      setCurrentUser(null);
+      localStorage.removeItem("user");
+      navigate("/login", { replace: true });
+    };
+
+    return (
+      <div class="login-page">
+        <div class="logged-in-card">
+          <h1>BDSMLR</h1>
+          <p>Logged in as <strong>{user.blog_name || user.username || user.email}</strong></p>
+          <div class="login-actions">
+            <A href="/" class="btn-ghost">Go to feed</A>
+            <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
