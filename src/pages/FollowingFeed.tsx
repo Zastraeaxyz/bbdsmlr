@@ -15,12 +15,14 @@ export default function FollowingFeed() {
   const [error, setError] = createSignal('')
   const [query, setQuery] = createSignal('')
   const [activeQuery, setActiveQuery] = createSignal('')
+  const [sortField, setSortField] = createSignal(1)
+  const [sortOrder, setSortOrder] = createSignal(1)
   let page = 1
 
   const loadPage = async () => {
     const q = activeQuery()
     if (q) {
-      const data = await searchPostsByTag({ tag_name: q, page, page_size: 20 })
+      const data = await searchPostsByTag({ tag_name: q, sort_field: sortField(), order: sortOrder(), page, page_size: 20 })
       const incoming = data.posts ?? []
       setPosts((prev) => [...prev, ...incoming])
       if (incoming.length < 20) setHasMore(false)
@@ -79,6 +81,8 @@ export default function FollowingFeed() {
   const doSearch = (e: Event) => {
     e.preventDefault()
     setActiveQuery(query())
+    setSortField(1)
+    setSortOrder(1)
     page = 1
     setPosts([])
     setHasMore(true)
@@ -88,6 +92,8 @@ export default function FollowingFeed() {
   const clearSearch = () => {
     setQuery('')
     setActiveQuery('')
+    setSortField(1)
+    setSortOrder(1)
     page = 1
     setPosts([])
     setHasMore(true)
@@ -98,6 +104,8 @@ export default function FollowingFeed() {
     const q = (query() ? query() + ' ' : '') + `tag:${tag}`
     setQuery(q)
     setActiveQuery(q)
+    setSortField(1)
+    setSortOrder(1)
     page = 1
     setPosts([])
     setHasMore(true)
@@ -111,6 +119,27 @@ export default function FollowingFeed() {
       </Header>
       <main>
         <form class="search-bar" onSubmit={doSearch}>
+          <select
+            class="sort-select"
+            value={sortField() + '-' + sortOrder()}
+            onChange={(e) => {
+              const [sf, so] = e.currentTarget.value.split('-').map(Number)
+              setSortField(sf)
+              setSortOrder(so)
+              page = 1
+              setPosts([])
+              setHasMore(true)
+              loadPage()
+            }}
+          >
+            <option value="1-1">Newest</option>
+            <option value="1-2">Oldest</option>
+            <option value="6-1">Most popular</option>
+            <option value="6-2">Least popular</option>
+            <option value="2-1">Most liked</option>
+            <option value="3-1">Most commented</option>
+            <option value="4-1">Most reblogged</option>
+          </select>
           <div class="search-input-wrap">
             <input
               type="text"

@@ -217,6 +217,28 @@ button:disabled {
   color: var(--text);
 }
 
+.sort-select {
+  font: inherit;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 140px;
+}
+
+.sort-select:focus {
+  border-color: var(--accent);
+}
+
+.sort-select option {
+  background: var(--bg);
+  color: var(--text);
+}
+
 .search-bar > button[type="submit"] {
   white-space: nowrap;
 }

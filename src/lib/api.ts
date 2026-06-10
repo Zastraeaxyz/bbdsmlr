@@ -169,6 +169,8 @@ export function listBlogActivity(req: ListBlogActivityRequest) {
 
 export interface SearchPostsByTagRequest {
   tag_name: string
+  sort_field?: number
+  order?: number
   page?: number
   page_size?: number
 }
