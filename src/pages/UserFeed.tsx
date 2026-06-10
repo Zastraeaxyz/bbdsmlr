@@ -1,7 +1,7 @@
 import { createSignal, createEffect, onCleanup } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
-import { getCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, type Post, type TopTag } from '../lib/api'
-import { sanitizeHtml } from '../lib/sanitize'
+import { getCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, PostType, type Post, type TopTag } from '../lib/api'
+import { sanitizeHtml, processContentHtml } from '../lib/sanitize'
 import Header from '../components/Header'
 
 const PAGE_SIZE = 20
@@ -176,6 +176,13 @@ function PostCard(props: { post: Post }) {
     return []
   }
 
+  const contentHtml = () => {
+    const c = post.content
+    if (!c?.html) return null
+    const processed = post.type === PostType.Text ? processContentHtml(c.html, c.files) : c.html
+    return sanitizeHtml(processed)
+  }
+
   return (
     <div class="feed-card">
       <div class="feed-card-header">
@@ -188,8 +195,8 @@ function PostCard(props: { post: Post }) {
         )}
       </div>
       {post.title && <div class="feed-card-title">{post.title}</div>}
-      {post.content?.html && <div class="feed-card-body" innerHTML={sanitizeHtml(post.content!.html!)} />}
-      {imageUrls().length > 0 && (
+      {contentHtml() && <div class="feed-card-body" innerHTML={contentHtml()!} />}
+      {post.type !== PostType.Text && imageUrls().length > 0 && (
         <div class="feed-card-images">
           {imageUrls().map((url) => (
             <div class="media-shell">

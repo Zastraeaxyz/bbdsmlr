@@ -107,6 +107,17 @@ export function listBlogsRecentActivity(blogIds: number[], pageSize = 20) {
   })
 }
 
+export const PostType = {
+  General: 0,
+  Text: 1,
+  Image: 2,
+  Video: 3,
+  Audio: 4,
+  Link: 5,
+  Poll: 6,
+  Quote: 7,
+} as const
+
 export interface PostContent {
   files?: string[]
   thumbnail?: string
