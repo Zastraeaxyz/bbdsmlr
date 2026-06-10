@@ -2,6 +2,7 @@
 
 1. Never commit or push unless explicitly requested by the user.
 2. Always use conventional commits style (e.g. `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, etc.).
+3. This is a SolidJS repository, not a React repository. You may not do inline maps or inline IIFEs in JSX, as those break Solid's ability to track elements. Use `<For>` instead of `.map()` and `<Show>` instead of conditional IIFEs.
 
 # API quirks
 
