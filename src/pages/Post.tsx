@@ -1,4 +1,4 @@
-import { createSignal, createEffect } from 'solid-js'
+import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
 import { getCurrentUser, getPostDetail, PostType, type Post } from '../lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
@@ -42,11 +42,9 @@ export default function PostPage() {
       <main>
         {error() && <p class="error">{error()}</p>}
         {loading() && <p class="loading">Loading post…</p>}
-        {(() => {
-          const p = post()
-          if (!p || loading()) return null
-          return <PostDetail post={p} />
-        })()}
+        <Show when={!loading() && post()}>
+          <PostDetail post={post()!} />
+        </Show>
       </main>
     </div>
   )
@@ -101,25 +99,27 @@ function PostDetail(props: { post: Post }) {
 
       {p.type !== PostType.Text && imageUrls().length > 0 && (
         <div class="post-detail-images">
-          {imageUrls().map((url) => (
-            <div class="media-shell">
-              <img
-                src={url}
-                alt=""
-                loading="lazy"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
-              <video
-                src={url}
-                muted
-                playsinline
-                controls
-                loop
-                preload="metadata"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
-            </div>
-          ))}
+          <For each={imageUrls()}>
+            {(url) => (
+              <div class="media-shell">
+                <img
+                  src={url}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+                <video
+                  src={url}
+                  muted
+                  playsinline
+                  controls
+                  loop
+                  preload="metadata"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+              </div>
+            )}
+          </For>
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import { createSignal, createEffect } from 'solid-js'
+import { createSignal, createEffect, For, Show } from 'solid-js'
 import { A } from '@solidjs/router'
 import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, PostType, type Post } from '../lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
@@ -50,18 +50,13 @@ export default function FollowingFeed() {
 
         {loading() && <p class="loading">Loading feed…</p>}
 
-        {(() => {
-          const items = posts()
-          if (loading()) return null
-          if (!items || items.length === 0) return <p class="empty">No posts from followed blogs.</p>
-          return (
+        <Show when={!loading()}>
+          <Show when={posts().length > 0} fallback={<p class="empty">No posts from followed blogs.</p>}>
             <div class="feed">
-              {items.map((post) => (
-                <PostCard post={post} />
-              ))}
+              <For each={posts()}>{(post) => <PostCard post={post} />}</For>
             </div>
-          )
-        })()}
+          </Show>
+        </Show>
       </main>
     </div>
   )
@@ -114,25 +109,27 @@ function PostCard(props: { post: Post }) {
       {contentHtml() && <div class="feed-card-body" innerHTML={contentHtml()!} />}
       {post.type !== PostType.Text && imageUrls().length > 0 && (
         <div class="feed-card-images">
-          {imageUrls().map((url) => (
-            <div class="media-shell">
-              <img
-                src={url}
-                alt=""
-                loading="lazy"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
-              <video
-                src={url}
-                muted
-                playsinline
-                controls
-                loop
-                preload="metadata"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
-            </div>
-          ))}
+          <For each={imageUrls()}>
+            {(url) => (
+              <div class="media-shell">
+                <img
+                  src={url}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+                <video
+                  src={url}
+                  muted
+                  playsinline
+                  controls
+                  loop
+                  preload="metadata"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+              </div>
+            )}
+          </For>
         </div>
       )}
       {post.tags && post.tags.length > 0 && (
