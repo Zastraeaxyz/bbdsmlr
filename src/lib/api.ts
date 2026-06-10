@@ -170,8 +170,8 @@ export function getPostDetail(postId: number) {
 }
 
 export interface TopTag {
-  tag: string
-  count: number
+  name: string
+  postsCount: number
 }
 
 export interface ListBlogTopTagsResponse {

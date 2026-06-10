@@ -1,9 +1,9 @@
 import { createSignal, createEffect } from 'solid-js'
-import { useNavigate, useParams, A } from '@solidjs/router'
-import { getCurrentUser, setCurrentUser, getPostDetail, type Post } from '../lib/api'
+import { useParams, A } from '@solidjs/router'
+import { getCurrentUser, getPostDetail, type Post } from '../lib/api'
+import Header from '../components/Header'
 
 export default function PostPage() {
-  const navigate = useNavigate()
   const params = useParams()
   const user = getCurrentUser()
 
@@ -32,28 +32,12 @@ export default function PostPage() {
       .finally(() => setLoading(false))
   })
 
-  const handleSignOut = () => {
-    setCurrentUser(null)
-    setPost(null)
-    setError('')
-    localStorage.removeItem('user')
-    navigate('/login', { replace: true })
-  }
-
   return (
     <div class="home-page">
-      <header>
-        <h1>BDSMLR</h1>
-        <span class="user-info">{user?.blog_name || user?.username}</span>
+      <Header info={user?.blog_name || user?.username || undefined}>
         <A href="/" class="btn-ghost">Home</A>
-        {user && (
-          <>
-            <A href={`/${user.blog_name}`} class="btn-ghost">My feed</A>
-            <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
-          </>
-        )}
-        {!user && <A href="/login" class="btn-ghost">Sign in</A>}
-      </header>
+        {user && <A href={`/${user.blog_name}`} class="btn-ghost">My feed</A>}
+      </Header>
       <main>
         {error() && <p class="error">{error()}</p>}
         {loading() && <p class="loading">Loading post…</p>}
@@ -106,7 +90,7 @@ function PostDetail(props: { post: Post }) {
 
       {p.title && <h2 class="post-detail-title">{p.title}</h2>}
       {p.body && <div class="post-detail-body">{p.body}</div>}
-      {p.content?.html && <div class="post-detail-body" innerHTML={p.content.html} />}
+      {p.content?.html && <div class="post-detail-body" ref={el => el.innerHTML = p.content!.html!} />}
 
       {imageUrls().length > 0 && (
         <div class="post-detail-images">

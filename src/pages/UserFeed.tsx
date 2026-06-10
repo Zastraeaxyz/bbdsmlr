@@ -1,18 +1,43 @@
-import { createSignal, createEffect } from 'solid-js'
-import { useNavigate, useParams, A } from '@solidjs/router'
-import { getCurrentUser, setCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, type Post, type TopTag } from '../lib/api'
+import { createSignal, createEffect, onCleanup } from 'solid-js'
+import { useParams, A } from '@solidjs/router'
+import { getCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, type Post, type TopTag } from '../lib/api'
+import Header from '../components/Header'
+
+const PAGE_SIZE = 20
 
 export default function UserFeed() {
-  const navigate = useNavigate()
   const params = useParams()
   const slug = () => params.user
 
   const user = getCurrentUser()
 
-  const [posts, setPosts] = createSignal<Post[]>()
+  const [posts, setPosts] = createSignal<Post[]>([])
   const [topTags, setTopTags] = createSignal<TopTag[]>([])
   const [loading, setLoading] = createSignal(true)
+  const [loadingMore, setLoadingMore] = createSignal(false)
+  const [hasMore, setHasMore] = createSignal(true)
   const [error, setError] = createSignal('')
+
+  let resolvedId: number | null = null
+  let page = 1
+  let sentinel: HTMLDivElement | undefined
+
+  const loadPage = async (name: string) => {
+    if (!resolvedId) return
+    const data = await listBlogActivity({
+      blog_id: resolvedId,
+      blog_name: name,
+      sort_field: 1,
+      order: 2,
+      post_types: [1, 2, 3, 4, 5, 6, 7],
+      activity_kinds: ['post', 'reblog'],
+      page,
+      page_size: PAGE_SIZE,
+    })
+    const incoming = data.posts ?? []
+    setPosts((prev) => [...prev, ...incoming])
+    if (incoming.length < PAGE_SIZE) setHasMore(false)
+  }
 
   const fetchFeed = async () => {
     const name = slug()
@@ -21,24 +46,20 @@ export default function UserFeed() {
       return
     }
     setLoading(true)
+    setLoadingMore(false)
     setError('')
+    setPosts([])
+    setHasMore(true)
+    resolvedId = null
+    page = 1
     try {
       const resolved = await resolveIdentifier(name)
       if (!resolved.blogId) {
         setError(resolved.error || 'User not found')
         return
       }
-      const data = await listBlogActivity({
-        blog_id: resolved.blogId,
-        blog_name: resolved.blogName || name,
-        sort_field: 1,
-        order: 2,
-        post_types: [1, 2, 3, 4, 5, 6, 7],
-        activity_kinds: ['post', 'reblog'],
-        page: 1,
-        page_size: 20,
-      })
-      setPosts(data.posts ?? [])
+      resolvedId = resolved.blogId
+      await loadPage(name)
 
       const tagsRes = await listBlogTopTags(name)
       setTopTags(tagsRes.tags ?? [])
@@ -53,30 +74,52 @@ export default function UserFeed() {
     fetchFeed()
   })
 
-  const handleSignOut = () => {
-    setCurrentUser(null)
-    localStorage.removeItem('user')
-    navigate('/login', { replace: true })
+  createEffect(() => {
+    const el = sentinel
+    if (!el || !hasMore()) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || loadingMore() || !hasMore()) return
+        loadMore()
+      },
+      { rootMargin: '400px' },
+    )
+    observer.observe(el)
+    onCleanup(() => observer.disconnect())
+  })
+
+  const loadMore = async () => {
+    const name = slug()
+    if (!name || !resolvedId || !hasMore() || loadingMore()) return
+    setLoadingMore(true)
+    page++
+    try {
+      await loadPage(name)
+    } catch {
+      page--
+    } finally {
+      setLoadingMore(false)
+    }
   }
 
   return (
     <div class="home-page">
-      <header>
-        <h1>BDSMLR</h1>
-        <span class="user-info">{slug()}</span>
-        {user && (
-          <>
-            <A href="/following" class="btn-ghost">Following</A>
-            <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
-          </>
-        )}
-        {!user && <A href="/login" class="btn-ghost">Sign in</A>}
-      </header>
+      <Header info={slug()}>
+        {user && <A href="/following" class="btn-ghost">Following</A>}
+      </Header>
       {topTags().length > 0 && (
         <section class="top-tags">
-          {topTags().map((t) => (
-            <span class="tag">#{t.tag} ({t.count})</span>
-          ))}
+          <div class="top-tags-inner">
+            <span class="top-tags-label">Top tags</span>
+            <div class="top-tags-list">
+              {topTags().slice(0, 5).map((t) => (
+                <span class="tag">
+                  <span class="tag-name">{t.name}</span>
+                  <span class="tag-count">{t.postsCount}</span>
+                </span>
+              ))}
+            </div>
+          </div>
         </section>
       )}
       <main>
@@ -86,7 +129,7 @@ export default function UserFeed() {
 
         {(() => {
           const items = posts()
-          if (!items || loading()) return null
+          if (loading()) return null
           if (items.length === 0) return <p class="empty">No posts in feed.</p>
           return (
             <div class="feed">
@@ -96,6 +139,12 @@ export default function UserFeed() {
             </div>
           )
         })()}
+
+        {loadingMore() && <p class="loading">Loading more…</p>}
+
+        {hasMore() && !loading() && (
+          <div ref={(el) => { sentinel = el }} class="sentinel" />
+        )}
       </main>
     </div>
   )
@@ -139,7 +188,7 @@ function PostCard(props: { post: Post }) {
       </div>
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {post.body && <div class="feed-card-body">{post.body}</div>}
-      {post.content?.html && <div class="feed-card-body" innerHTML={post.content.html} />}
+      {post.content?.html && <div class="feed-card-body" ref={el => el.innerHTML = post.content!.html!} />}
       {imageUrls().length > 0 && (
         <div class="feed-card-images">
           {imageUrls().map((url) => (

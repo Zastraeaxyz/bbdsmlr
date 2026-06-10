@@ -1,9 +1,9 @@
 import { createSignal, createEffect } from 'solid-js'
-import { useNavigate, A } from '@solidjs/router'
-import { getCurrentUser, setCurrentUser, blogFollowGraph, listBlogsRecentActivity, type Post } from '../lib/api'
+import { A } from '@solidjs/router'
+import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, type Post } from '../lib/api'
+import Header from '../components/Header'
 
 export default function FollowingFeed() {
-  const navigate = useNavigate()
   const user = getCurrentUser()
 
   const [posts, setPosts] = createSignal<Post[]>([])
@@ -39,25 +39,11 @@ export default function FollowingFeed() {
     fetchFollowingFeed()
   })
 
-  const handleSignOut = () => {
-    setCurrentUser(null)
-    localStorage.removeItem('user')
-    navigate('/login', { replace: true })
-  }
-
   return (
     <div class="home-page">
-      <header>
-        <h1>BDSMLR</h1>
-        <span class="user-info">Following feed</span>
-        {user && (
-          <>
-            <A href={`/${user.blog_name}`} class="btn-ghost">My blog</A>
-            <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
-          </>
-        )}
-        {!user && <A href="/login" class="btn-ghost">Sign in</A>}
-      </header>
+      <Header info="Following feed">
+        {user && <A href={`/${user.blog_name}`} class="btn-ghost">My blog</A>}
+      </Header>
       <main>
         {error() && <p class="error">{error()}</p>}
 
@@ -118,7 +104,7 @@ function PostCard(props: { post: Post }) {
       </div>
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {post.body && <div class="feed-card-body">{post.body}</div>}
-      {post.content?.html && <div class="feed-card-body" innerHTML={post.content.html} />}
+      {post.content?.html && <div class="feed-card-body" ref={el => el.innerHTML = post.content!.html!} />}
       {imageUrls().length > 0 && (
         <div class="feed-card-images">
           {imageUrls().map((url) => (
