@@ -1,6 +1,6 @@
 import { createSignal, createEffect, onCleanup } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
-import { getCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, PostType, type Post, type TopTag } from '../lib/api'
+import { getCurrentUser, resolveIdentifier, listBlogActivity, listBlogTopTags, getBlog, PostType, type Post, type TopTag, type Blog } from '../lib/api'
 import { sanitizeHtml, processContentHtml } from '../lib/sanitize'
 import Header from '../components/Header'
 
@@ -14,6 +14,7 @@ export default function UserFeed() {
 
   const [posts, setPosts] = createSignal<Post[]>([])
   const [topTags, setTopTags] = createSignal<TopTag[]>([])
+  const [blog, setBlog] = createSignal<Blog | null>(null)
   const [loading, setLoading] = createSignal(true)
   const [loadingMore, setLoadingMore] = createSignal(false)
   const [hasMore, setHasMore] = createSignal(true)
@@ -62,7 +63,11 @@ export default function UserFeed() {
       resolvedId = resolved.blogId
       await loadPage(name)
 
-      const tagsRes = await listBlogTopTags(name)
+      const [blogRes, tagsRes] = await Promise.all([
+        getBlog(resolved.blogId),
+        listBlogTopTags(name),
+      ])
+      setBlog(blogRes.blog ?? null)
       setTopTags(tagsRes.tags ?? [])
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Failed to load feed')
@@ -108,6 +113,24 @@ export default function UserFeed() {
       <Header info={slug()}>
         {user && <A href="/following" class="btn-ghost">Following</A>}
       </Header>
+      {(() => {
+        const b = blog()
+        if (!b) return null
+        return (
+          <section class="blog-header">
+            <div class="blog-header-inner">
+              {b.avatarUrl && (
+                <img class="blog-avatar" src={b.avatarUrl} alt="" />
+              )}
+              <div class="blog-header-info">
+                {b.title && <h2 class="blog-title">{b.title}</h2>}
+                {b.description && <p class="blog-description">{b.description}</p>}
+              </div>
+            </div>
+          </section>
+        )
+      })()}
+
       {topTags().length > 0 && (
         <section class="top-tags">
           <div class="top-tags-inner">

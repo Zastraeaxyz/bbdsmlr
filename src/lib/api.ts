@@ -197,3 +197,23 @@ export function listBlogTopTags(blogName: string, pageSize = 150) {
   })
 }
 
+export interface Blog {
+  id: string
+  name: string
+  title?: string
+  description?: string
+  avatarUrl?: string
+  coverUrl?: string
+  followersCount?: string
+  postsCount?: string
+}
+
+export interface GetBlogResponse {
+  blog?: Blog
+  error?: string
+}
+
+export function getBlog(blogId: number) {
+  return request<GetBlogResponse>(API_BASE, '/get-blog', { blogId: String(blogId) })
+}
+
