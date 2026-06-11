@@ -1,3 +1,12 @@
+export type MediaType = 'image' | 'video'
+
+export function getMediaType(url: string): MediaType {
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase()
+  if (!ext) return 'image'
+  if (['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(ext)) return 'video'
+  return 'image'
+}
+
 export function transformMediaUrl(url: string): string {
   const qidx = url.indexOf('?')
   const baseUrl = qidx !== -1 ? url.slice(0, qidx) : url
@@ -28,14 +37,10 @@ export function processContentHtml(html: string, files?: string[]): string {
     const cdnFilename = src.split('/').pop()?.split('?')[0]
     const url = (cdnFilename && fileMap.get(cdnFilename)) || src
 
-    const isGif = /\.gif(?:\?|$)/i.test(url)
-    const videoAttrs = isGif
-      ? 'muted autoplay loop playsinline controls'
-      : 'muted controls'
-
-    return `<div class="media-shell">`
-      + `<img src="${url}" alt="" loading="lazy" onerror="this.style.display='none'" />`
-      + `<video src="${url}" ${videoAttrs} preload="metadata" onerror="this.style.display='none'"></video>`
-      + `</div>`
+    const type = getMediaType(url)
+    if (type === 'video') {
+      return `<video src="${url}" muted controls preload="metadata"></video>`
+    }
+    return `<img src="${url}" alt="" loading="lazy" />`
   })
 }

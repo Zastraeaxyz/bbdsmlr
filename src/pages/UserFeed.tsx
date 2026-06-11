@@ -16,6 +16,8 @@ import {
   sanitizeHtml,
   processContentHtml,
   transformMediaUrl,
+  getMediaType,
+  type MediaType,
 } from "../lib/sanitize";
 import Header from "../components/Header";
 import SearchHelp from "../components/SearchHelp";
@@ -274,12 +276,15 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
     }
   };
 
-  const imageUrls = () => {
+  const mediaItems = (): { url: string; type: MediaType }[] => {
     const c = post.content;
     if (!c) return [];
-    if (c.files && c.files.length > 0) return c.files.map(transformMediaUrl);
-    if (c.thumbnail) return [transformMediaUrl(c.thumbnail)];
-    return [];
+    const urls = c.files && c.files.length > 0
+      ? c.files.map(transformMediaUrl)
+      : c.thumbnail
+        ? [transformMediaUrl(c.thumbnail)]
+        : [];
+    return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
   const contentHtml = () => {
@@ -315,33 +320,26 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
           }
         }} />
       )}
-      {post.type !== PostType.Text && imageUrls().length > 0 && (
+      {post.type !== PostType.Text && mediaItems().length > 0 && (
         <div class="feed-card-images">
-          <For each={imageUrls()}>
-            {(url) => (
-              <div class="media-shell">
+          <For each={mediaItems()}>
+            {(item) => (
+              <Show when={item.type === 'image'} fallback={
+                <video
+                  src={item.url}
+                  muted
+                  controls
+                  preload="metadata"
+                  onClick={() => props.onImageClick?.(item.url)}
+                />
+              }>
                 <img
-                  src={url}
+                  src={item.url}
                   alt=""
                   loading="lazy"
-                  onClick={() => props.onImageClick?.(url)}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
+                  onClick={() => props.onImageClick?.(item.url)}
                 />
-                <video
-                  src={url}
-                  muted
-                  playsinline
-                  controls
-                  loop
-                  preload="metadata"
-                  onClick={() => props.onImageClick?.(url)}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              </div>
+              </Show>
             )}
           </For>
         </div>

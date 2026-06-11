@@ -1,7 +1,7 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
 import { getCurrentUser, getPostDetail, PostType, PostVariant, type Post } from '../lib/api'
-import { sanitizeHtml, processContentHtml, transformMediaUrl } from '../lib/sanitize'
+import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '../lib/sanitize'
 import Header from '../components/Header'
 import { ReblogAttribution } from '../components/ReblogAttribution'
 import { LightBox } from '../components/LightBox'
@@ -71,12 +71,15 @@ function PostDetail(props: { post: Post; onImageClick?: (url: string) => void })
     }
   }
 
-  const imageUrls = () => {
+  const mediaItems = (): { url: string; type: MediaType }[] => {
     const c = p.content
     if (!c) return []
-    if (c.files && c.files.length > 0) return c.files.map(transformMediaUrl)
-    if (c.thumbnail) return [transformMediaUrl(c.thumbnail)]
-    return []
+    const urls = c.files && c.files.length > 0
+      ? c.files.map(transformMediaUrl)
+      : c.thumbnail
+        ? [transformMediaUrl(c.thumbnail)]
+        : []
+    return urls.map((url) => ({ url, type: getMediaType(url) }))
   }
 
   const contentHtml = () => {
@@ -108,29 +111,26 @@ function PostDetail(props: { post: Post; onImageClick?: (url: string) => void })
         }
       }} />}
 
-      {p.type !== PostType.Text && imageUrls().length > 0 && (
+      {p.type !== PostType.Text && mediaItems().length > 0 && (
         <div class="post-detail-images">
-          <For each={imageUrls()}>
-            {(url) => (
-              <div class="media-shell">
+          <For each={mediaItems()}>
+            {(item) => (
+              <Show when={item.type === 'image'} fallback={
+                <video
+                  src={item.url}
+                  muted
+                  controls
+                  preload="metadata"
+                  onClick={() => props.onImageClick?.(item.url)}
+                />
+              }>
                 <img
-                  src={url}
+                  src={item.url}
                   alt=""
                   loading="lazy"
-                  onClick={() => props.onImageClick?.(url)}
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  onClick={() => props.onImageClick?.(item.url)}
                 />
-                <video
-                  src={url}
-                  muted
-                  playsinline
-                  controls
-                  loop
-                  preload="metadata"
-                  onClick={() => props.onImageClick?.(url)}
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
-                />
-              </div>
+              </Show>
             )}
           </For>
         </div>
