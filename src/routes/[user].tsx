@@ -23,6 +23,7 @@ import Header from "~/components/Header";
 import SearchHelp from "~/components/SearchHelp";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
+import { HeartIcon, ChatIcon, ReblogIcon } from "~/components/Icons";
 
 const PAGE_SIZE = 20;
 
@@ -401,9 +402,9 @@ function PostCard(props: {
         </div>
       )}
       <div class="feed-card-meta">
-        <span>❤ {post.likesCount ?? 0}</span>
-        <span>💬 {post.commentsCount ?? 0}</span>
-        <span>🔁 {post.reblogsCount ?? 0}</span>
+        <span><HeartIcon /> {post.likesCount ?? 0}</span>
+        <span><ChatIcon /> {post.commentsCount ?? 0}</span>
+        <span><ReblogIcon /> {post.reblogsCount ?? 0}</span>
         <A href={`/post/${post.id}`} class="feed-card-permalink">
           Permalink
         </A>

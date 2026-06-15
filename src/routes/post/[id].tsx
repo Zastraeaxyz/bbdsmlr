@@ -6,6 +6,7 @@ import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type
 import Header from '~/components/Header'
 import { ReblogAttribution } from '~/components/ReblogAttribution'
 import { LightBox } from '~/components/LightBox'
+import { HeartIcon, ChatIcon, ReblogIcon } from '~/components/Icons'
 
 export default function PostPage() {
   const params = useParams()
@@ -147,9 +148,9 @@ function PostDetail(props: { post: Post; onImageClick?: (url: string) => void })
       )}
 
       <div class="post-detail-meta">
-        <span>❤ {p.likesCount ?? 0}</span>
-        <span>💬 {p.commentsCount ?? 0}</span>
-        <span>🔁 {p.reblogsCount ?? 0}</span>
+        <span><HeartIcon /> {p.likesCount ?? 0}</span>
+        <span><ChatIcon /> {p.commentsCount ?? 0}</span>
+        <span><ReblogIcon /> {p.reblogsCount ?? 0}</span>
       </div>
     </article>
   )

@@ -580,6 +580,13 @@ button:disabled {
   align-items: center;
 }
 
+.feed-card-meta span,
+.post-detail-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 .feed-card-permalink {
   margin-left: auto;
   font-size: 12px;
@@ -665,6 +672,11 @@ button:disabled {
   color: var(--text-muted);
   padding-top: 16px;
   border-top: 1px solid var(--border);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
 }
 
 .lightbox-backdrop {
