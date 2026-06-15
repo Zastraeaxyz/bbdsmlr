@@ -250,6 +250,7 @@ export interface Blog {
   coverUrl?: string
   followersCount?: string
   postsCount?: string
+  createdAt?: string
 }
 
 export interface GetBlogResponse {

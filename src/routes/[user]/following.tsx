@@ -1,7 +1,7 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
 import { Title } from '@solidjs/meta'
-import { resolveIdentifier, blogFollowGraph, type FollowEdge } from '~/lib/api'
+import { resolveIdentifier, blogFollowGraph, getBlog, type FollowEdge, type Blog } from '~/lib/api'
 import Header from '~/components/Header'
 
 export default function FollowingPage() {
@@ -9,6 +9,7 @@ export default function FollowingPage() {
   const slug = () => params.user
 
   const [following, setFollowing] = createSignal<FollowEdge[]>([])
+  const [blogs, setBlogs] = createSignal<Record<string, Blog>>({})
   const [loading, setLoading] = createSignal(true)
   const [error, setError] = createSignal('')
 
@@ -36,6 +37,15 @@ export default function FollowingPage() {
         if (!pageToken) break
       }
       setFollowing(all)
+
+      const blogMap: Record<string, Blog> = {}
+      await Promise.all(all.map(async (f) => {
+        try {
+          const res = await getBlog(Number(f.blogId))
+          if (res.blog) blogMap[f.blogId] = res.blog
+        } catch {}
+      }))
+      setBlogs(blogMap)
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Failed to load following')
     } finally {
@@ -62,11 +72,25 @@ export default function FollowingPage() {
           >
             <div class="following-list">
               <For each={following()}>
-                {(f) => (
-                  <A href={`/${f.blogName}`} class="following-item">
-                    {f.blogName}
-                  </A>
-                )}
+                {(f) => {
+                  const b = blogs()[f.blogId]
+                  return (
+                    <A href={`/${f.blogName}`} class="following-item">
+                      <Show when={b?.avatarUrl}>
+                        <img class="following-item-avatar" src={b!.avatarUrl!} alt="" />
+                      </Show>
+                      <div class="following-item-body">
+                        <span class="following-item-name">{b?.title || f.blogName}</span>
+                        <Show when={b?.description}>
+                          <span class="following-item-desc">{b!.description}</span>
+                        </Show>
+                        <Show when={b?.createdAt}>
+                          <span class="following-item-meta">Created {b!.createdAt}</span>
+                        </Show>
+                      </div>
+                    </A>
+                  )
+                }}
               </For>
             </div>
           </Show>
