@@ -17,26 +17,16 @@ A read-only browser client for [BDSMLR](https://bdsmlr.com/). Log in, follow you
 
 I will not deploy or host a public instance of this app for legal reasons. You **must self-host** if you want to use it. A downloadable desktop version may come in the future for ease of use.
 
-## Running
+## Running the app in Docker
 
 > **Not a developer?** Install [opencode desktop](https://opencode.ai) and use its free "**big pickle**" model — most of this repo was written with it, so it can handle setting everything up for you.
 
-### Via npm
+1. Install [Docker](https://www.docker.com/) on your system.
+2. Clone the repo
+3. Run: `docker compose up -d`
 
-```bash
-npm install
-npm run build
-node .output/server/index.mjs
-```
+That's all there is to it.
 
-The app listens on **port 3000** by default.
-
-### Via Docker
-
-```bash
-docker compose up -d
-```
-
-The app listens on **port 3000**. A named volume (`drizzle-data`) persists the SQLite database across restarts.
+The app listens on **port 3000**. A named volume (`drizzle-data`) persists the SQLite database across restarts. SQLite stores download information.
 
 Then open [http://localhost:3000](http://localhost:3000).
