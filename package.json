@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "swagger:fetch": "./scripts/fetch-swagger.sh",
     "swagger:generate": "swagger-typescript-api generate -p src/lib/api/openapi.json -o src/lib/api -n client.ts --modular --axios",

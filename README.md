@@ -1,28 +1,31 @@
-## Usage
+# Better BDSMLR
+
+A read-only browser client for [BDSMLR](https://bdsmlr.com/). Log in, follow your feed, search posts, and browse blogs — no posting or write capabilities.
+
+## Features
+
+- **Login** — Authenticate with email/username and password
+- **Following feed** — See recent posts from blogs you follow, with sort and pagination
+- **Blog pages** — View any blog's posts, header, avatar, description, and top tags
+- **Advanced Search** — Rich query syntax with operators, field filters (`tag:`, `blog:`, `post:`, `media:`, `when:`), and boolean logic
+- **Liked posts** — Browse your liked posts
+- **Post detail** — View full post content with media, tags, counts, and reblog attribution
+- **Media lightbox** — Click images/videos for a full-screen overlay
+- **Read-only** — Browsing client with no posting or write capabilities
+
+## Disclaimer
+
+I will not deploy or host a public instance of this app for legal reasons. You **must self-host** if you want to use it. A downloadable desktop version may come in the future for ease of use.
+
+## Running Locally
+
+> **Not a developer?** Install [opencode desktop](https://opencode.ai) and use its free "**big pickle**" model — most of this repo was written with it, so it can handle setting everything up for you.
 
 ```bash
-$ npm install # or pnpm install or yarn install
+# Install dependencies
+npm install
+# Start the dev server
+npm run dev
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+The app opens at [http://localhost:5173](http://localhost:5173). Log in with your BDSMLR credentials to get started.
