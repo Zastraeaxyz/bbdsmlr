@@ -3,7 +3,7 @@ import { useParams, A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
   resolveIdentifier,
-  listBlogActivity,
+  searchPostsByTag,
   listBlogTopTags,
   getBlog,
   PostType,
@@ -41,6 +41,8 @@ export default function UserFeed() {
   const [query, setQuery] = createSignal("");
   const [activeQuery, setActiveQuery] = createSignal("");
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
+  const [sortField, setSortField] = createSignal(1);
+  const [sortOrder, setSortOrder] = createSignal(2);
 
   let resolvedId: number | null = null;
   let page = 1;
@@ -48,14 +50,10 @@ export default function UserFeed() {
   const loadPage = async (name: string) => {
     if (!resolvedId) return;
     const q = activeQuery();
-    const data = await listBlogActivity({
-      blog_id: resolvedId,
-      blog_name: name,
-      ...(q ? { q } : {}),
-      sort_field: 1,
-      order: 2,
-      post_types: [1, 2, 3, 4, 5, 6, 7],
-      activity_kinds: ["post", "reblog"],
+    const data = await searchPostsByTag({
+      tag_name: ["blog:" + name, q].filter(Boolean).join(" "),
+      sort_field: sortField(),
+      order: sortOrder(),
       page,
       page_size: PAGE_SIZE,
     });
@@ -202,6 +200,28 @@ export default function UserFeed() {
       )}
       <main>
         <form class="search-bar" onSubmit={doSearch}>
+          <select
+            class="sort-select"
+            value={sortField() + "-" + sortOrder()}
+            onChange={(e) => {
+              const [sf, so] = e.currentTarget.value.split("-").map(Number);
+              setSortField(sf);
+              setSortOrder(so);
+              page = 1;
+              setPosts([]);
+              setHasMore(true);
+              const name = slug();
+              if (name) loadPage(name);
+            }}
+          >
+            <option value="1-2">Newest</option>
+            <option value="1-1">Oldest</option>
+            <option value="6-1">Most popular</option>
+            <option value="6-2">Least popular</option>
+            <option value="2-1">Most liked</option>
+            <option value="3-1">Most commented</option>
+            <option value="4-1">Most reblogged</option>
+          </select>
           <div class="search-input-wrap">
             <input
               type="text"
