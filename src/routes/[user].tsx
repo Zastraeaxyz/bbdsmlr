@@ -14,6 +14,7 @@ import {
   type TopTag,
   type Blog,
 } from "~/lib/api";
+import SortDropdown from "~/components/SortDropdown";
 import {
   sanitizeHtml,
   processContentHtml,
@@ -209,11 +210,9 @@ export default function UserFeed() {
       )}
       <main>
         <form class="search-bar" onSubmit={doSearch}>
-          <select
-            class="sort-select"
+          <SortDropdown
             value={`${sortField()}-${sortOrder()}`}
-            onChange={(e) => {
-              const [sf, so] = e.currentTarget.value.split("-").map(Number);
+            onChange={(sf, so) => {
               setSortField(sf);
               setSortOrder(so);
               page = 1;
@@ -222,15 +221,16 @@ export default function UserFeed() {
               const name = slug();
               if (name) loadPage(name);
             }}
-          >
-            <option value={`${SortField.Date}-${SortOrder.Descending}`}>Newest</option>
-            <option value={`${SortField.Date}-${SortOrder.Ascending}`}>Oldest</option>
-            <option value={`${SortField.Popularity}-${SortOrder.Ascending}`}>Most popular</option>
-            <option value={`${SortField.Popularity}-${SortOrder.Descending}`}>Least popular</option>
-            <option value={`${SortField.Likes}-${SortOrder.Ascending}`}>Most liked</option>
-            <option value={`${SortField.Comments}-${SortOrder.Ascending}`}>Most commented</option>
-            <option value={`${SortField.Reblogs}-${SortOrder.Ascending}`}>Most reblogged</option>
-          </select>
+            options={{
+              newest: true,
+              oldest: true,
+              mostPopular: true,
+              leastPopular: true,
+              mostLiked: true,
+              mostCommented: true,
+              mostReblogged: true,
+            }}
+          />
           <div class="search-input-wrap">
             <input
               type="text"

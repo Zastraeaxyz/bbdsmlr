@@ -10,6 +10,7 @@ import {
   SortOrder,
   type Post,
 } from "~/lib/api";
+import SortDropdown from "~/components/SortDropdown";
 import {
   sanitizeHtml,
   processContentHtml,
@@ -105,11 +106,9 @@ export default function LikedPosts() {
       <Header info="Liked posts" />
       <main>
         <div class="search-bar">
-          <select
-            class="sort-select"
-            value={sortField() + "-" + sortOrder()}
-            onChange={(e) => {
-              const [sf, so] = e.currentTarget.value.split("-").map(Number);
+          <SortDropdown
+            value={`${sortField()}-${sortOrder()}`}
+            onChange={(sf, so) => {
               setSortField(sf);
               setSortOrder(so);
               nextPageToken = null;
@@ -117,10 +116,7 @@ export default function LikedPosts() {
               setHasMore(true);
               fetchLiked();
             }}
-          >
-            <option value={`${SortField.Date}-${SortOrder.Ascending}`}>Oldest</option>
-            <option value={`${SortField.Date}-${SortOrder.Descending}`}>Newest</option>
-          </select>
+          />
         </div>
 
         {error() && <p class="error">{error()}</p>}
