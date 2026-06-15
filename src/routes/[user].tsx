@@ -58,7 +58,8 @@ export default function UserFeed() {
       page_size: PAGE_SIZE,
     });
     if (data.error) {
-      const msg = data.error === "blog not found" ? "Blog was banned" : data.error;
+      const msg =
+        data.error === "blog not found" ? "Blog was banned" : data.error;
       throw new Error(msg);
     }
     const incoming = data.posts ?? [];
@@ -161,13 +162,13 @@ export default function UserFeed() {
         {(b) => (
           <section class="blog-header">
             <div class="blog-header-inner">
-              {b.avatarUrl && (
-                <img class="blog-avatar" src={b.avatarUrl} alt="" />
+              {b().avatarUrl && (
+                <img class="blog-avatar" src={b().avatarUrl} alt="" />
               )}
               <div class="blog-header-info">
-                {b.title && <h2 class="blog-title">{b.title}</h2>}
-                {b.description && (
-                  <p class="blog-description">{b.description}</p>
+                {b().title && <h2 class="blog-title">{b().title}</h2>}
+                {b().description && (
+                  <p class="blog-description">{b().description}</p>
                 )}
               </div>
             </div>
@@ -182,7 +183,11 @@ export default function UserFeed() {
             <div class="top-tags-list">
               <For each={topTags().slice(0, 5)}>
                 {(t) => (
-                  <button type="button" class="tag" onClick={() => handleTagClick(t.name)}>
+                  <button
+                    type="button"
+                    class="tag"
+                    onClick={() => handleTagClick(t.name)}
+                  >
                     <span class="tag-name">{t.name}</span>
                     <span class="tag-count">{t.postsCount}</span>
                   </button>
@@ -202,13 +207,28 @@ export default function UserFeed() {
               onInput={(e) => setQuery(e.currentTarget.value)}
             />
             {activeQuery() && (
-              <button type="button" class="search-input-clear" onClick={clearSearch}>
+              <button
+                type="button"
+                class="search-input-clear"
+                onClick={clearSearch}
+              >
                 ×
               </button>
             )}
           </div>
           <button type="submit">Search</button>
-          <SearchHelp onFill={(q) => { const name = slug(); if (!name) return; setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage(name); }} />
+          <SearchHelp
+            onFill={(q) => {
+              const name = slug();
+              if (!name) return;
+              setQuery(q);
+              setActiveQuery(q);
+              page = 1;
+              setPosts([]);
+              setHasMore(true);
+              loadPage(name);
+            }}
+          />
         </form>
 
         {error() && <p class="error">{error()}</p>}
@@ -216,9 +236,20 @@ export default function UserFeed() {
         {loading() && <p class="loading">Loading feed…</p>}
 
         <Show when={!loading()}>
-          <Show when={posts().length > 0} fallback={<p class="empty">No posts in feed.</p>}>
+          <Show
+            when={posts().length > 0}
+            fallback={<p class="empty">No posts in feed.</p>}
+          >
             <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
+              <For each={posts()}>
+                {(post) => (
+                  <PostCard
+                    post={post}
+                    onTagClick={handleTagClick}
+                    onImageClick={setLightboxUrl}
+                  />
+                )}
+              </For>
             </div>
           </Show>
         </Show>
@@ -239,7 +270,11 @@ export default function UserFeed() {
   );
 }
 
-function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onImageClick?: (url: string) => void }) {
+function PostCard(props: {
+  post: Post;
+  onTagClick?: (tag: string) => void;
+  onImageClick?: (url: string) => void;
+}) {
   const post = props.post;
 
   const postTypeLabel = (type?: number) => {
@@ -268,11 +303,12 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
   const mediaItems = (): { url: string; type: MediaType }[] => {
     const c = post.content;
     if (!c) return [];
-    const urls = c.files && c.files.length > 0
-      ? c.files.map(transformMediaUrl)
-      : c.thumbnail
-        ? [transformMediaUrl(c.thumbnail)]
-        : [];
+    const urls =
+      c.files && c.files.length > 0
+        ? c.files.map(transformMediaUrl)
+        : c.thumbnail
+          ? [transformMediaUrl(c.thumbnail)]
+          : [];
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
@@ -299,29 +335,43 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
           </span>
         )}
       </div>
-      <ReblogAttribution originBlogName={post.originBlogName} originPostId={post.originPostId} variant={post.variant} />
+      <ReblogAttribution
+        originBlogName={post.originBlogName}
+        originPostId={post.originPostId}
+        variant={post.variant}
+      />
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {contentHtml() && (
-        <div class="feed-card-body" innerHTML={contentHtml()!} onClick={(e) => {
-          const target = e.target as HTMLElement;
-          if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
-            props.onImageClick?.(target.getAttribute('src')!);
-          }
-        }} />
+        <div
+          class="feed-card-body"
+          innerHTML={contentHtml()!}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (
+              (target.tagName === "IMG" || target.tagName === "VIDEO") &&
+              target.getAttribute("src")
+            ) {
+              props.onImageClick?.(target.getAttribute("src")!);
+            }
+          }}
+        />
       )}
       {post.type !== PostType.Text && mediaItems().length > 0 && (
         <div class="feed-card-images">
           <For each={mediaItems()}>
             {(item) => (
-              <Show when={item.type === 'image'} fallback={
-                <video
-                  src={item.url}
-                  muted
-                  controls
-                  preload="metadata"
-                  onClick={() => props.onImageClick?.(item.url)}
-                />
-              }>
+              <Show
+                when={item.type === "image"}
+                fallback={
+                  <video
+                    src={item.url}
+                    muted
+                    controls
+                    preload="metadata"
+                    onClick={() => props.onImageClick?.(item.url)}
+                  />
+                }
+              >
                 <img
                   src={item.url}
                   alt=""
@@ -335,11 +385,17 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
       )}
       {post.tags && post.tags.length > 0 && (
         <div class="feed-card-tags">
-          <For each={post.tags}>{(t) => (
-            <button type="button" class="tag" onClick={() => props.onTagClick?.(t)}>
-              #{t}
-            </button>
-          )}</For>
+          <For each={post.tags}>
+            {(t) => (
+              <button
+                type="button"
+                class="tag"
+                onClick={() => props.onTagClick?.(t)}
+              >
+                #{t}
+              </button>
+            )}
+          </For>
         </div>
       )}
       <div class="feed-card-meta">
