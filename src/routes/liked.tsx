@@ -80,9 +80,7 @@ export default function LikedPosts() {
 
   return (
     <div class="home-page">
-      <Header info="Liked posts">
-        {user && <A href="/following" class="btn-ghost">Following</A>}
-      </Header>
+      <Header info="Liked posts" />
       <main>
         {error() && <p class="error">{error()}</p>}
 

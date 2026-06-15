@@ -1,7 +1,6 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
 import { useParams, A } from "@solidjs/router";
 import {
-  getCurrentUser,
   resolveIdentifier,
   listBlogActivity,
   listBlogTopTags,
@@ -29,8 +28,6 @@ const PAGE_SIZE = 20;
 export default function UserFeed() {
   const params = useParams();
   const slug = () => params.user;
-
-  const user = getCurrentUser();
 
   const [posts, setPosts] = createSignal<Post[]>([]);
   const [topTags, setTopTags] = createSignal<TopTag[]>([]);
@@ -159,13 +156,7 @@ export default function UserFeed() {
 
   return (
     <div class="home-page">
-      <Header info={slug()}>
-        {user && (
-          <A href="/following" class="btn-ghost">
-            Following
-          </A>
-        )}
-      </Header>
+      <Header info={slug()} />
       <Show when={blog()}>
         {(b) => (
           <section class="blog-header">

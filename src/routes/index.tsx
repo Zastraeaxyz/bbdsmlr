@@ -140,10 +140,7 @@ export default function Home() {
   return (
     <Show when={ready()} fallback={null}>
       <div class="home-page">
-        <Header info="Following feed">
-          {user() && <A href={`/${user()!.blog_name}`} class="btn-ghost">My blog</A>}
-          {user() && <A href="/liked" class="btn-ghost">Liked</A>}
-        </Header>
+        <Header info="Following feed" />
         <main>
           <form class="search-bar" onSubmit={doSearch}>
             <select
