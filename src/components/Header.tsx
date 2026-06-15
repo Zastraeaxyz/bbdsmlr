@@ -3,6 +3,8 @@ import { useNavigate, A } from '@solidjs/router'
 import { useAuth } from '../lib/useAuth'
 import { getBlog } from '../lib/api'
 
+const avatarCache = new Map<number, string>()
+
 interface HeaderProps {
   info?: string
   children?: any
@@ -25,9 +27,17 @@ export default function Header(props: HeaderProps) {
   createEffect(() => {
     const u = user()
     if (u?.blog_id) {
-      getBlog(u.blog_id).then((res) => {
-        if (res.blog?.avatarUrl) setAvatarUrl(res.blog.avatarUrl)
-      })
+      const cached = avatarCache.get(u.blog_id)
+      if (cached) {
+        setAvatarUrl(cached)
+      } else {
+        getBlog(u.blog_id).then((res) => {
+          if (res.blog?.avatarUrl) {
+            avatarCache.set(u.blog_id, res.blog.avatarUrl)
+            setAvatarUrl(res.blog.avatarUrl)
+          }
+        })
+      }
     }
   })
 
@@ -54,7 +64,7 @@ export default function Header(props: HeaderProps) {
   })
 
   return (
-    <header>
+    <header style="view-transition-name: header">
       <h1><A href="/">BDSMLR</A></h1>
       {props.info && <span class="user-info">{props.info}</span>}
       {props.children}
