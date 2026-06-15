@@ -25,5 +25,12 @@ dist-ssr
 *.sln
 *.sw?
 
+reference/
+
 # Business logic related
 downloads/
+
+# Database
+drizzle/data/
+*.sqlite
+*.sqlite3

@@ -4,26 +4,34 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
+    "predev": "pnpm db:migrate",
     "dev": "vite dev",
     "build": "vite build",
     "start": "vite start",
     "preview": "vite preview",
     "swagger:fetch": "./scripts/fetch-swagger.sh",
     "swagger:generate": "swagger-typescript-api generate -p src/lib/api/openapi.json -o src/lib/api -n client.ts --modular --axios",
-    "swagger:update": "npm run swagger:fetch && npm run swagger:generate"
+    "swagger:update": "npm run swagger:fetch && npm run swagger:generate",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "prestart": "pnpm db:migrate"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.0",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "2.0.0-alpha.2",
     "@solidjs/vite-plugin-nitro-2": "^0.1.0",
+    "drizzle-orm": "^0.45.1",
     "fflate": "^0.8.3",
     "solid-js": "^1.9.12",
     "vite": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.12.3",
+    "drizzle-kit": "^0.31.8",
     "swagger-typescript-api": "^13.12.2",
+    "tsx": "^4.21.0",
     "typescript": "~6.0.2"
   },
   "engines": {
