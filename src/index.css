@@ -1139,13 +1139,34 @@ button:disabled {
   border-color: var(--accent);
 }
 
+.following-item-avatar-wrap {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
 .following-item-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
-  flex-shrink: 0;
+  display: block;
+}
+
+.following-item-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
 }
 
 .following-item-body {
