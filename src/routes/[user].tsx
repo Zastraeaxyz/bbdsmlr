@@ -24,6 +24,7 @@ import SearchHelp from "~/components/SearchHelp";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
 import { HeartIcon, ChatIcon, ReblogIcon } from "~/components/Icons";
+import { formatRelativeDate } from "~/lib/date";
 
 const PAGE_SIZE = 20;
 
@@ -354,7 +355,7 @@ function PostCard(props: {
         <span class="feed-card-type">{postTypeLabel(post.type)}</span>
         {post.createdAtUnix && (
           <span class="feed-card-time">
-            {new Date(post.createdAtUnix * 1000).toLocaleString()}
+            {formatRelativeDate(post.createdAtUnix)}
           </span>
         )}
       </div>

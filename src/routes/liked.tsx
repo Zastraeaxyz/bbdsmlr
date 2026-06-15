@@ -19,6 +19,7 @@ import Header from "~/components/Header";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
 import { HeartIcon, ChatIcon, ReblogIcon } from "~/components/Icons";
+import { formatRelativeDate } from "~/lib/date";
 
 export default function LikedPosts() {
   const user = getCurrentUser();
@@ -210,7 +211,7 @@ function PostCard(props: { post: Post; onImageClick?: (url: string) => void }) {
         <span class="feed-card-type">{postTypeLabel(post.type)}</span>
         {post.createdAtUnix && (
           <span class="feed-card-time">
-            {new Date(post.createdAtUnix * 1000).toLocaleString()}
+            {formatRelativeDate(post.createdAtUnix)}
           </span>
         )}
       </div>

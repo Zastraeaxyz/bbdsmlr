@@ -19,6 +19,7 @@ import Header from "~/components/Header";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
 import { HeartIcon, ChatIcon, ReblogIcon } from "~/components/Icons";
+import { formatRelativeDate } from "~/lib/date";
 
 export default function PostPage() {
   const params = useParams();
@@ -139,7 +140,7 @@ function PostDetail(props: {
         <span class="feed-card-type">{postTypeLabel(props.post.type)}</span>
         {props.post.createdAtUnix && (
           <span class="post-detail-time">
-            {new Date(props.post.createdAtUnix * 1000).toLocaleString()}
+            {formatRelativeDate(props.post.createdAtUnix)}
           </span>
         )}
       </div>
