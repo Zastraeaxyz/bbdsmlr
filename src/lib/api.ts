@@ -54,6 +54,12 @@ export interface ListBlogsRecentActivityResponse {
 export interface FollowEdge {
   blogId: string
   blogName: string
+  avatarUrl?: string
+  title?: string
+  description?: string
+  createdAt?: string
+  followersCount?: number
+  postsCount?: number
   userId?: string
 }
 
