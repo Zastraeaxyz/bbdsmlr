@@ -59,8 +59,6 @@ export default function Header(props: HeaderProps) {
       {props.info && <span class="user-info">{props.info}</span>}
       {props.children}
       <A href="/" class="btn-ghost">Home</A>
-      {user() && <A href={`/${user()!.blog_name}`} class="btn-ghost">My blog</A>}
-      <A href="/liked" class="btn-ghost">Liked</A>
       {user() ? (
         <div class="user-dropdown" ref={containerRef}>
           <button
@@ -78,11 +76,25 @@ export default function Header(props: HeaderProps) {
           <Show when={showDropdown()}>
             <div class="user-dropdown-menu">
               <A
+                href={`/${user()!.blog_name}`}
+                class="user-dropdown-item"
+                onClick={() => setShowDropdown(false)}
+              >
+                My blog
+              </A>
+              <A
                 href="/following"
                 class="user-dropdown-item"
                 onClick={() => setShowDropdown(false)}
               >
                 Following
+              </A>
+              <A
+                href="/liked"
+                class="user-dropdown-item"
+                onClick={() => setShowDropdown(false)}
+              >
+                Liked
               </A>
               <button
                 type="button"

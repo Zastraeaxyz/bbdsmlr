@@ -195,6 +195,9 @@ export default function UserFeed() {
                   <A href={`/${slug()}/following`} class="download-btn" title="Following">
                     Following
                   </A>
+                  <A href={`/${slug()}`} class="download-btn" title="Feed">
+                    Feed
+                  </A>
                 </div>
               </div>
             </div>
