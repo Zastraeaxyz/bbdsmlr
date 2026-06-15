@@ -9,12 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Show all tags** — A "Show all (N)" button appears after the top 5 tags on user profiles. Clicking it opens a modal with every remaining tag. The modal closes when you click outside, click the X, or click a tag (which also adds it to the current filter).
+- **Bulk downloads** — You can now download every post from a blog or all of your liked posts as a single ZIP archive. A progress panel in the header tracks each job and lets you download the ZIP once it is ready.
+- **Resumable downloads** — Bulk downloads are persisted on the server using SQLite. If you navigate away or close the tab, the job continues in the background and you can resume it when you return.
 - **Login disclaimer** — The login page now shows a legal disclaimer explaining that this is an alternative front-end to BDSMLR, that all content is user-provided and hosted by BDSMLR, and that you must be of legal age to view adult content. You must check an acknowledgement box before signing in, confirming that the developers own no displayed content and that you comply with BDSMLR's Terms of Service.
 - **Profile search fix** — Searching on user profiles now uses the blog-specific search API again instead of the global tag search.
 - **Sort readability** — Sort field and order values are now expressed as human-readable named constants (`SortField.Date`, `SortOrder.Descending`, etc.) throughout the codebase.
 - **Sort label fix** — Sort dropdowns now correctly label `Date + Descending` as "Newest" and `Date + Ascending` as "Oldest", matching the actual API semantics.
 - **Custom sort dropdown** — The sort selector is now a custom dropdown instead of a native browser `<select>`. It stays open when you click elsewhere on the page, and its selection persists when you submit a search or press Enter. Each page can configure which sort options are available.
 - **Open on BDSMLR** — Every post card and profile page now has a button that opens the original post or blog on BDSMLR in a new tab.
+
+### Fixed
+
+- **Tags with spaces** — Tags containing spaces are now wrapped in quotes when added to the search filter (e.g. `tag:"hello world"` instead of `tag:hello world`), so the API correctly matches the full tag.
+- **Liked posts bulk download authentication** — The liked-posts page and download-jobs panel now read the user from `localStorage` reactively instead of capturing it at module load time, so the bulk download button works reliably on direct page refreshes.
+- **Cookie forwarding for download jobs** — All download-job API calls now explicitly send `credentials: 'include'`, ensuring the server can forward the authentication cookie to the BDSMLR API when discovering and downloading liked posts.
+- **Two-phase bulk downloads** — Clicking "Download all" now starts a discovery phase that finds all posts without downloading anything. Once discovery is complete, the download panel shows a confirmation prompt: "You're about to download X images from Y posts." You must click "Start download" before any actual downloading begins. This makes large bulk downloads more predictable and easier to debug.
 
 ## [0.1.0] - 2026-06-15
 

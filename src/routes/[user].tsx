@@ -47,6 +47,7 @@ export default function UserFeed() {
   const [query, setQuery] = createSignal("");
   const [activeQuery, setActiveQuery] = createSignal("");
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
+  const [showAllTags, setShowAllTags] = createSignal(false);
   const [sortField, setSortField] = createSignal(SortField.Date);
   const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
 
@@ -156,7 +157,7 @@ export default function UserFeed() {
   const handleTagClick = (tag: string) => {
     const name = slug();
     if (!name) return;
-    const q = (query() ? query() + " " : "") + `tag:${tag}`;
+    const q = (query() ? query() + " " : "") + `tag:${tag.includes(" ") ? `"${tag}"` : tag}`;
     setQuery(q);
     setActiveQuery(q);
     page = 1;
@@ -214,10 +215,51 @@ export default function UserFeed() {
                   </button>
                 )}
               </For>
+              {topTags().length > 5 && (
+                <button
+                  type="button"
+                  class="tag"
+                  onClick={() => setShowAllTags(true)}
+                >
+                  Show all ({topTags().length - 5})
+                </button>
+              )}
             </div>
           </div>
         </section>
       )}
+      <Show when={showAllTags()}>
+        <div
+          class="tag-modal-backdrop"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAllTags(false); }}
+        >
+          <div class="tag-modal" tabIndex={0}>
+            <button
+              type="button"
+              class="tag-modal-close"
+              onClick={() => setShowAllTags(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h3>All tags</h3>
+            <div class="tag-modal-list">
+              <For each={topTags().slice(5)}>
+                {(t) => (
+                  <button
+                    type="button"
+                    class="tag"
+                    onClick={() => { handleTagClick(t.name); setShowAllTags(false); }}
+                  >
+                    <span class="tag-name">{t.name}</span>
+                    <span class="tag-count">{t.postsCount}</span>
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+        </div>
+      </Show>
       <main>
         <form class="search-bar" onSubmit={doSearch}>
           <SortDropdown

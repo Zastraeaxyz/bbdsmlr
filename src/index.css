@@ -885,6 +885,70 @@ button:disabled {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* ---- Tag Modal ---- */
+
+.tag-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+  padding: 20px;
+}
+
+.tag-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  cursor: default;
+  position: relative;
+}
+
+.tag-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.tag-modal-close:hover {
+  color: var(--text-heading);
+  background: var(--bg-hover);
+}
+
+.tag-modal h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: var(--text-heading);
+  padding-right: 40px;
+}
+
+.tag-modal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 /* ---- Download Modal ---- */
 
 .download-modal-backdrop {
