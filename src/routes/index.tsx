@@ -2,8 +2,6 @@ import { createSignal, createEffect, For, Show } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
-  getCurrentUser,
-  setCurrentUser,
   blogFollowGraph,
   listBlogsRecentActivity,
   searchPostsByTag,
@@ -13,6 +11,7 @@ import {
   SortOrder,
   type Post,
 } from "~/lib/api";
+import { useAuth } from "~/lib/useAuth";
 import SortDropdown from "~/components/SortDropdown";
 import {
   sanitizeHtml,
@@ -32,26 +31,12 @@ import { formatRelativeDate } from "~/lib/date";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [user, setUser] = createSignal(getCurrentUser());
-  const [ready, setReady] = createSignal(false);
+  const { user, loading: authLoading } = useAuth();
 
   createEffect(() => {
-    let u = user();
-    if (!u) {
-      try {
-        const stored = localStorage.getItem("user");
-        if (stored) {
-          u = JSON.parse(stored);
-          setCurrentUser(u);
-          setUser(u);
-        }
-      } catch {}
-    }
-    if (!u) {
+    if (!authLoading() && !user()) {
       navigate("/login", { replace: true });
-      return;
     }
-    setReady(true);
   });
 
   const [posts, setPosts] = createSignal<Post[]>([]);
@@ -115,7 +100,7 @@ export default function Home() {
   };
 
   createEffect(() => {
-    if (!ready()) return;
+    if (authLoading() || !user()) return;
     fetchFeed();
   });
 
@@ -161,7 +146,7 @@ export default function Home() {
   };
 
   return (
-    <Show when={ready()} fallback={null}>
+    <Show when={!authLoading() && user()} fallback={null}>
       <Title>Following feed — bbdsmlr</Title>
       <div class="home-page">
         <Header info="Following feed" />

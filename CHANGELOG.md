@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Auth reactivity** — Extracted auth state into a shared `useAuth` hook with a context provider so the nav bar and every page reactively reflect the login state instead of each one duplicating `localStorage` reads and module-level variable checks. Login redirects and sign-out now work consistently across all routes.
 - **Tags with spaces** — Tags containing spaces are now wrapped in quotes when added to the search filter (e.g. `tag:"hello world"` instead of `tag:hello world`), so the API correctly matches the full tag.
 - **Liked posts bulk download authentication** — The liked-posts page and download-jobs panel now read the user from `localStorage` reactively instead of capturing it at module load time, so the bulk download button works reliably on direct page refreshes.
 - **Cookie forwarding for download jobs** — All download-job API calls now explicitly send `credentials: 'include'`, ensuring the server can forward the authentication cookie to the BDSMLR API when discovering and downloading liked posts.

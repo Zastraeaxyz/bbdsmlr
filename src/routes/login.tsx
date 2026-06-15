@@ -1,43 +1,35 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
-import { getCurrentUser, setCurrentUser, login } from "~/lib/api";
+import { useAuth } from "~/lib/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
-
-  createEffect(() => {
-    let user = getCurrentUser();
-    if (!user) {
-      try {
-        user = JSON.parse(localStorage.getItem("user") || "null");
-      } catch {}
-    }
-    if (user) {
-      setCurrentUser(user);
-      navigate(`/${user.blog_name}`, { replace: true });
-    }
-  });
+  const { user, loading: authLoading, login: authLogin } = useAuth();
 
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
-  const [loading, setLoading] = createSignal(false);
+  const [submitting, setSubmitting] = createSignal(false);
   const [acknowledged, setAcknowledged] = createSignal(false);
+
+  createEffect(() => {
+    if (user() && !authLoading()) {
+      navigate(`/${user()!.blog_name}`, { replace: true });
+    }
+  });
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setError("");
     try {
-      const user = await login(email(), password(), true);
-      setCurrentUser(user);
-      localStorage.setItem("user", JSON.stringify(user));
-      navigate(`/${user.blog_name}`, { replace: true });
+      const u = await authLogin(email(), password());
+      navigate(`/${u.blog_name}`, { replace: true });
     } catch (err: unknown) {
       setError((err as Error)?.message || "Login failed");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -116,8 +108,8 @@ export default function Login() {
               own no content that is shown in this app, and that you are of legal age to view adult content in your jurisdiction.
             </span>
           </label>
-          <button type="submit" disabled={loading() || !acknowledged()}>
-            {loading() ? "Signing in…" : "Sign in"}
+          <button type="submit" disabled={submitting() || !acknowledged() || authLoading()}>
+            {submitting() ? "Signing in…" : "Sign in"}
           </button>
         </form>
       </div>

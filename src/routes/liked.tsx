@@ -2,7 +2,6 @@ import { createSignal, createEffect, For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
-  getCurrentUser,
   listBlogActivity,
   PostType,
   PostVariant,
@@ -10,6 +9,7 @@ import {
   SortOrder,
   type Post,
 } from "~/lib/api";
+import { useAuth } from "~/lib/useAuth";
 import SortDropdown from "~/components/SortDropdown";
 import {
   sanitizeHtml,
@@ -27,7 +27,7 @@ import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
 
 export default function LikedPosts() {
-  const user = getCurrentUser();
+  const { user } = useAuth();
 
   const [posts, setPosts] = createSignal<Post[]>([]);
   const [loading, setLoading] = createSignal(true);
@@ -40,7 +40,8 @@ export default function LikedPosts() {
   let nextPageToken: string | null = null;
 
   const fetchLiked = async () => {
-    if (!user?.blog_id) {
+    const u = user();
+    if (!u?.blog_id) {
       setError("Not authenticated");
       setLoading(false);
       return;
@@ -53,7 +54,7 @@ export default function LikedPosts() {
     nextPageToken = null;
     try {
       const data = await listBlogActivity({
-        blog_id: user.blog_id,
+        blog_id: u.blog_id,
         sort_field: sortField(),
         order: sortOrder(),
         post_types: [1, 2, 3, 4, 5, 6, 7],
@@ -76,13 +77,14 @@ export default function LikedPosts() {
   });
 
   const loadMore = async () => {
-    if (!user?.blog_id || !hasMore() || loadingMore() || !nextPageToken) return;
+    const u = user();
+    if (!u?.blog_id || !hasMore() || loadingMore() || !nextPageToken) return;
     setLoadingMore(true);
     const token = nextPageToken;
     nextPageToken = null;
     try {
       const data = await listBlogActivity({
-        blog_id: user.blog_id,
+        blog_id: u.blog_id,
         sort_field: sortField(),
         order: sortOrder(),
         post_types: [1, 2, 3, 4, 5, 6, 7],

@@ -2,12 +2,12 @@ import { createSignal, createEffect, For, Show } from "solid-js";
 import { useParams, A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
-  getCurrentUser,
   getPostDetail,
   PostType,
   PostVariant,
   type Post,
 } from "~/lib/api";
+import { useAuth } from "~/lib/useAuth";
 import {
   sanitizeHtml,
   processContentHtml,
@@ -25,7 +25,7 @@ import { formatRelativeDate } from "~/lib/date";
 
 export default function PostPage() {
   const params = useParams();
-  const user = getCurrentUser();
+  const { user } = useAuth();
 
   const [post, setPost] = createSignal<Post | null>(null);
   const [loading, setLoading] = createSignal(true);
@@ -62,12 +62,12 @@ export default function PostPage() {
           ? `${post()!.blogName}'s Post — bbdsmlr`
           : "Post — bbdsmlr"}
       </Title>
-      <Header info={user?.blog_name || user?.username || undefined}>
+      <Header info={user()?.blog_name || user()?.username || undefined}>
         <A href="/" class="btn-ghost">
           Home
         </A>
-        {user && (
-          <A href={`/${user.blog_name}`} class="btn-ghost">
+        {user() && (
+          <A href={`/${user()!.blog_name}`} class="btn-ghost">
             My feed
           </A>
         )}
