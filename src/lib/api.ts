@@ -68,10 +68,11 @@ export interface BlogFollowGraphResponse {
   error?: string
 }
 
-export function blogFollowGraph(blogId: number) {
+export function blogFollowGraph(blogId: number, pageToken?: string) {
   return request<BlogFollowGraphResponse>(API_BASE, '/blog-follow-graph', {
     blogId: String(blogId),
     direction: 'following',
+    ...(pageToken ? { pageToken } : {}),
   })
 }
 

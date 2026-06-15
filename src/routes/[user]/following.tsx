@@ -27,8 +27,15 @@ export default function FollowingPage() {
         setError(resolved.error || 'User not found')
         return
       }
-      const graph = await blogFollowGraph(resolved.blogId)
-      setFollowing(graph.following || [])
+      const all: FollowEdge[] = []
+      let pageToken: string | undefined
+      while (true) {
+        const graph = await blogFollowGraph(resolved.blogId, pageToken)
+        all.push(...(graph.following || []))
+        pageToken = graph.nextPageToken
+        if (!pageToken) break
+      }
+      setFollowing(all)
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Failed to load following')
     } finally {
