@@ -1,143 +1,164 @@
-import { createSignal, createEffect, For, Show } from 'solid-js'
-import { A, useNavigate } from '@solidjs/router'
-import { Title } from '@solidjs/meta'
-import { getCurrentUser, setCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '~/lib/api'
-import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
-import Header from '~/components/Header'
-import SearchHelp from '~/components/SearchHelp'
-import { ReblogAttribution } from '~/components/ReblogAttribution'
-import { LightBox } from '~/components/LightBox'
-import { HeartIcon, ChatIcon, ReblogIcon } from '~/components/Icons'
+import { createSignal, createEffect, For, Show } from "solid-js";
+import { A, useNavigate } from "@solidjs/router";
+import { Title } from "@solidjs/meta";
+import {
+  getCurrentUser,
+  setCurrentUser,
+  blogFollowGraph,
+  listBlogsRecentActivity,
+  searchPostsByTag,
+  PostType,
+  PostVariant,
+  type Post,
+} from "~/lib/api";
+import {
+  sanitizeHtml,
+  processContentHtml,
+  transformMediaUrl,
+  getMediaType,
+  type MediaType,
+} from "~/lib/sanitize";
+import Header from "~/components/Header";
+import SearchHelp from "~/components/SearchHelp";
+import { ReblogAttribution } from "~/components/ReblogAttribution";
+import { LightBox } from "~/components/LightBox";
+import { HeartIcon, ChatIcon, ReblogIcon } from "~/components/Icons";
 
 export default function Home() {
-  const navigate = useNavigate()
-  const [user, setUser] = createSignal(getCurrentUser())
-  const [ready, setReady] = createSignal(false)
+  const navigate = useNavigate();
+  const [user, setUser] = createSignal(getCurrentUser());
+  const [ready, setReady] = createSignal(false);
 
   createEffect(() => {
-    let u = user()
+    let u = user();
     if (!u) {
       try {
-        const stored = localStorage.getItem('user')
+        const stored = localStorage.getItem("user");
         if (stored) {
-          u = JSON.parse(stored)
-          setCurrentUser(u)
-          setUser(u)
+          u = JSON.parse(stored);
+          setCurrentUser(u);
+          setUser(u);
         }
       } catch {}
     }
     if (!u) {
-      navigate('/login', { replace: true })
-      return
+      navigate("/login", { replace: true });
+      return;
     }
-    setReady(true)
-  })
+    setReady(true);
+  });
 
-  const [posts, setPosts] = createSignal<Post[]>([])
-  const [loading, setLoading] = createSignal(true)
-  const [loadingMore, setLoadingMore] = createSignal(false)
-  const [hasMore, setHasMore] = createSignal(true)
-  const [error, setError] = createSignal('')
-  const [query, setQuery] = createSignal('')
-  const [activeQuery, setActiveQuery] = createSignal('')
-  const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null)
-  const [sortField, setSortField] = createSignal(1)
-  const [sortOrder, setSortOrder] = createSignal(1)
-  let page = 1
+  const [posts, setPosts] = createSignal<Post[]>([]);
+  const [loading, setLoading] = createSignal(true);
+  const [loadingMore, setLoadingMore] = createSignal(false);
+  const [hasMore, setHasMore] = createSignal(true);
+  const [error, setError] = createSignal("");
+  const [query, setQuery] = createSignal("");
+  const [activeQuery, setActiveQuery] = createSignal("");
+  const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
+  const [sortField, setSortField] = createSignal(1);
+  const [sortOrder, setSortOrder] = createSignal(2);
+  let page = 1;
 
   const loadPage = async () => {
-    const q = activeQuery()
+    const q = activeQuery();
     if (q) {
-      const data = await searchPostsByTag({ tag_name: q, sort_field: sortField(), order: sortOrder(), page, page_size: 20 })
-      const incoming = data.posts ?? []
-      setPosts((prev) => [...prev, ...incoming])
-      if (incoming.length < 20) setHasMore(false)
+      const data = await searchPostsByTag({
+        tag_name: q,
+        sort_field: sortField(),
+        order: sortOrder(),
+        page,
+        page_size: 20,
+      });
+      const incoming = data.posts ?? [];
+      setPosts((prev) => [...prev, ...incoming]);
+      if (incoming.length < 20) setHasMore(false);
     } else {
-      if (!user()?.blog_id) return
-      const graph = await blogFollowGraph(user()!.blog_id!)
-      const following = graph.following || []
+      if (!user()?.blog_id) return;
+      const graph = await blogFollowGraph(user()!.blog_id!);
+      const following = graph.following || [];
       if (following.length === 0) {
-        setPosts([])
-        return
+        setPosts([]);
+        return;
       }
-      const blogIds = following.map((f) => Number(f.blogId))
-      const data = await listBlogsRecentActivity(blogIds, 20)
-      setPosts(data.posts ?? [])
+      const blogIds = following.map((f) => Number(f.blogId));
+      const data = await listBlogsRecentActivity(blogIds, 20);
+      setPosts(data.posts ?? []);
     }
-  }
+  };
 
   const fetchFeed = async () => {
     if (!user()?.blog_id) {
-      setError('Not authenticated')
-      setLoading(false)
-      return
+      setError("Not authenticated");
+      setLoading(false);
+      return;
     }
-    setLoading(true)
-    setLoadingMore(false)
-    setError('')
-    setPosts([])
-    setHasMore(true)
-    page = 1
+    setLoading(true);
+    setLoadingMore(false);
+    setError("");
+    setPosts([]);
+    setHasMore(true);
+    page = 1;
     try {
-      await loadPage()
+      await loadPage();
     } catch (err: unknown) {
-      setError((err as Error)?.message || 'Failed to load feed')
+      setError((err as Error)?.message || "Failed to load feed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   createEffect(() => {
-    if (!ready()) return
-    fetchFeed()
-  })
+    if (!ready()) return;
+    fetchFeed();
+  });
 
   const loadMore = async () => {
-    if (!hasMore() || loadingMore()) return
-    setLoadingMore(true)
-    page++
+    if (!hasMore() || loadingMore()) return;
+    setLoadingMore(true);
+    page++;
     try {
-      await loadPage()
+      await loadPage();
     } catch {
-      page--
+      page--;
     } finally {
-      setLoadingMore(false)
+      setLoadingMore(false);
     }
-  }
+  };
 
   const doSearch = (e: Event) => {
-    e.preventDefault()
-    setActiveQuery(query())
-    setSortField(1)
-    setSortOrder(1)
-    page = 1
-    setPosts([])
-    setHasMore(true)
-    loadPage()
-  }
+    e.preventDefault();
+    setActiveQuery(query());
+    setSortField(1);
+    setSortOrder(1);
+    page = 1;
+    setPosts([]);
+    setHasMore(true);
+    loadPage();
+  };
 
   const clearSearch = () => {
-    setQuery('')
-    setActiveQuery('')
-    setSortField(1)
-    setSortOrder(1)
-    page = 1
-    setPosts([])
-    setHasMore(true)
-    fetchFeed()
-  }
+    setQuery("");
+    setActiveQuery("");
+    setSortField(1);
+    setSortOrder(1);
+    page = 1;
+    setPosts([]);
+    setHasMore(true);
+    fetchFeed();
+  };
 
   const handleTagClick = (tag: string) => {
-    const q = (query() ? query() + ' ' : '') + `tag:${tag}`
-    setQuery(q)
-    setActiveQuery(q)
-    setSortField(1)
-    setSortOrder(1)
-    page = 1
-    setPosts([])
-    setHasMore(true)
-    loadPage()
-  }
+    const q = (query() ? query() + " " : "") + `tag:${tag}`;
+    setQuery(q);
+    setActiveQuery(q);
+    setSortField(1);
+    setSortOrder(1);
+    page = 1;
+    setPosts([]);
+    setHasMore(true);
+    loadPage();
+  };
 
   return (
     <Show when={ready()} fallback={null}>
@@ -148,19 +169,19 @@ export default function Home() {
           <form class="search-bar" onSubmit={doSearch}>
             <select
               class="sort-select"
-              value={sortField() + '-' + sortOrder()}
+              value={sortField() + "-" + sortOrder()}
               onChange={(e) => {
-                const [sf, so] = e.currentTarget.value.split('-').map(Number)
-                setSortField(sf)
-                setSortOrder(so)
-                page = 1
-                setPosts([])
-                setHasMore(true)
-                loadPage()
+                const [sf, so] = e.currentTarget.value.split("-").map(Number);
+                setSortField(sf);
+                setSortOrder(so);
+                page = 1;
+                setPosts([]);
+                setHasMore(true);
+                loadPage();
               }}
             >
-              <option value="1-1">Newest</option>
-              <option value="1-2">Oldest</option>
+              <option value="1-2">Newest</option>
+              <option value="1-1">Oldest</option>
               <option value="6-1">Most popular</option>
               <option value="6-2">Least popular</option>
               <option value="2-1">Most liked</option>
@@ -175,13 +196,26 @@ export default function Home() {
                 onInput={(e) => setQuery(e.currentTarget.value)}
               />
               {activeQuery() && (
-                <button type="button" class="search-input-clear" onClick={clearSearch}>
+                <button
+                  type="button"
+                  class="search-input-clear"
+                  onClick={clearSearch}
+                >
                   ×
                 </button>
               )}
             </div>
             <button type="submit">Search</button>
-            <SearchHelp onFill={(q) => { setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage() }} />
+            <SearchHelp
+              onFill={(q) => {
+                setQuery(q);
+                setActiveQuery(q);
+                page = 1;
+                setPosts([]);
+                setHasMore(true);
+                loadPage();
+              }}
+            />
           </form>
 
           {error() && <p class="error">{error()}</p>}
@@ -189,9 +223,26 @@ export default function Home() {
           {loading() && <p class="loading">Loading feed…</p>}
 
           <Show when={!loading()}>
-            <Show when={posts().length > 0} fallback={<p class="empty">{activeQuery() ? 'No results found.' : 'No posts from followed blogs.'}</p>}>
+            <Show
+              when={posts().length > 0}
+              fallback={
+                <p class="empty">
+                  {activeQuery()
+                    ? "No results found."
+                    : "No posts from followed blogs."}
+                </p>
+              }
+            >
               <div class="feed">
-                <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
+                <For each={posts()}>
+                  {(post) => (
+                    <PostCard
+                      post={post}
+                      onTagClick={handleTagClick}
+                      onImageClick={setLightboxUrl}
+                    />
+                  )}
+                </For>
               </div>
             </Show>
           </Show>
@@ -203,55 +254,74 @@ export default function Home() {
               class="btn-ghost"
               style="display:block;margin:24px auto"
             >
-              {loadingMore() ? 'Loading…' : 'Load more'}
+              {loadingMore() ? "Loading…" : "Load more"}
             </button>
           )}
         </main>
         <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
       </div>
     </Show>
-  )
+  );
 }
 
-function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onImageClick?: (url: string) => void }) {
-  const post = props.post
+function PostCard(props: {
+  post: Post;
+  onTagClick?: (tag: string) => void;
+  onImageClick?: (url: string) => void;
+}) {
+  const post = props.post;
 
   const postTypeLabel = (type?: number) => {
     switch (type) {
-      case 0: return 'General'
-      case 1: return 'Text'
-      case 2: return 'Image'
-      case 3: return 'Video'
-      case 4: return 'Audio'
-      case 5: return 'Link'
-      case 6: return 'Poll'
-      case 7: return 'Quote'
-      default: return 'Post'
+      case 0:
+        return "General";
+      case 1:
+        return "Text";
+      case 2:
+        return "Image";
+      case 3:
+        return "Video";
+      case 4:
+        return "Audio";
+      case 5:
+        return "Link";
+      case 6:
+        return "Poll";
+      case 7:
+        return "Quote";
+      default:
+        return "Post";
     }
-  }
+  };
 
   const mediaItems = (): { url: string; type: MediaType }[] => {
-    const c = post.content
-    if (!c) return []
-    const urls = c.files && c.files.length > 0
-      ? c.files.map(transformMediaUrl)
-      : c.thumbnail
-        ? [transformMediaUrl(c.thumbnail)]
-        : []
-    return urls.map((url) => ({ url, type: getMediaType(url) }))
-  }
+    const c = post.content;
+    if (!c) return [];
+    const urls =
+      c.files && c.files.length > 0
+        ? c.files.map(transformMediaUrl)
+        : c.thumbnail
+          ? [transformMediaUrl(c.thumbnail)]
+          : [];
+    return urls.map((url) => ({ url, type: getMediaType(url) }));
+  };
 
   const contentHtml = () => {
-    const c = post.content
-    if (!c?.html) return null
-    const processed = post.type === PostType.Text ? processContentHtml(c.html, c.files) : c.html
-    return sanitizeHtml(processed)
-  }
+    const c = post.content;
+    if (!c?.html) return null;
+    const processed =
+      post.type === PostType.Text
+        ? processContentHtml(c.html, c.files)
+        : c.html;
+    return sanitizeHtml(processed);
+  };
 
   return (
     <div class="feed-card">
       <div class="feed-card-header">
-        <A href={`/${post.blogName}`} class="feed-card-blog">{post.blogName}</A>
+        <A href={`/${post.blogName}`} class="feed-card-blog">
+          {post.blogName}
+        </A>
         <span class="feed-card-type">{postTypeLabel(post.type)}</span>
         {post.createdAtUnix && (
           <span class="feed-card-time">
@@ -259,29 +329,43 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
           </span>
         )}
       </div>
-      <ReblogAttribution originBlogName={post.originBlogName} originPostId={post.originPostId} variant={post.variant} />
+      <ReblogAttribution
+        originBlogName={post.originBlogName}
+        originPostId={post.originPostId}
+        variant={post.variant}
+      />
       {post.title && <div class="feed-card-title">{post.title}</div>}
       {contentHtml() && (
-        <div class="feed-card-body" innerHTML={contentHtml()!} onClick={(e) => {
-          const target = e.target as HTMLElement
-          if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
-            props.onImageClick?.(target.getAttribute('src')!)
-          }
-        }} />
+        <div
+          class="feed-card-body"
+          innerHTML={contentHtml()!}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (
+              (target.tagName === "IMG" || target.tagName === "VIDEO") &&
+              target.getAttribute("src")
+            ) {
+              props.onImageClick?.(target.getAttribute("src")!);
+            }
+          }}
+        />
       )}
       {post.type !== PostType.Text && mediaItems().length > 0 && (
         <div class="feed-card-images">
           <For each={mediaItems()}>
             {(item) => (
-              <Show when={item.type === 'image'} fallback={
-                <video
-                  src={item.url}
-                  muted
-                  controls
-                  preload="metadata"
-                  onClick={() => props.onImageClick?.(item.url)}
-                />
-              }>
+              <Show
+                when={item.type === "image"}
+                fallback={
+                  <video
+                    src={item.url}
+                    muted
+                    controls
+                    preload="metadata"
+                    onClick={() => props.onImageClick?.(item.url)}
+                  />
+                }
+              >
                 <img
                   src={item.url}
                   alt=""
@@ -295,19 +379,33 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
       )}
       {post.tags && post.tags.length > 0 && (
         <div class="feed-card-tags">
-          <For each={post.tags}>{(t) => (
-            <button type="button" class="tag" onClick={() => props.onTagClick?.(t)}>
-              #{t}
-            </button>
-          )}</For>
+          <For each={post.tags}>
+            {(t) => (
+              <button
+                type="button"
+                class="tag"
+                onClick={() => props.onTagClick?.(t)}
+              >
+                #{t}
+              </button>
+            )}
+          </For>
         </div>
       )}
       <div class="feed-card-meta">
-        <span><HeartIcon /> {post.likesCount ?? 0}</span>
-        <span><ChatIcon /> {post.commentsCount ?? 0}</span>
-        <span><ReblogIcon /> {post.reblogsCount ?? 0}</span>
-        <A href={`/post/${post.id}`} class="feed-card-permalink">Permalink</A>
+        <span>
+          <HeartIcon /> {post.likesCount ?? 0}
+        </span>
+        <span>
+          <ChatIcon /> {post.commentsCount ?? 0}
+        </span>
+        <span>
+          <ReblogIcon /> {post.reblogsCount ?? 0}
+        </span>
+        <A href={`/post/${post.id}`} class="feed-card-permalink">
+          Permalink
+        </A>
       </div>
     </div>
-  )
+  );
 }

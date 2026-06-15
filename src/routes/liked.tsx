@@ -113,8 +113,8 @@ export default function LikedPosts() {
               fetchLiked();
             }}
           >
-            <option value="1-1">Oldest</option>
             <option value="1-2">Newest</option>
+            <option value="1-1">Oldest</option>
           </select>
         </div>
 
