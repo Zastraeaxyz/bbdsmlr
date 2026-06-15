@@ -18,4 +18,4 @@ COPY --from=build /app/drizzle ./drizzle
 RUN pnpm install --frozen-lockfile
 RUN mkdir -p /app/downloads
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["node", ".output/server/index.mjs"]
