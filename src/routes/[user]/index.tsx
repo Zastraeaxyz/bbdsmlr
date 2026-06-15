@@ -1,5 +1,5 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
-import { useParams, A } from "@solidjs/router";
+import { useParams, useLocation, A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
   resolveIdentifier,
@@ -26,7 +26,13 @@ import Header from "~/components/Header";
 import SearchHelp from "~/components/SearchHelp";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
-import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon, BdsmlrIcon } from "~/components/Icons";
+import {
+  HeartIcon,
+  ChatIcon,
+  ReblogIcon,
+  DownloadIcon,
+  BdsmlrIcon,
+} from "~/components/Icons";
 import { DownloadModal } from "~/components/DownloadModal";
 import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
@@ -36,6 +42,7 @@ const PAGE_SIZE = 20;
 export default function UserFeed() {
   const params = useParams();
   const slug = () => params.user;
+  const location = useLocation();
 
   const [posts, setPosts] = createSignal<Post[]>([]);
   const [topTags, setTopTags] = createSignal<TopTag[]>([]);
@@ -157,7 +164,9 @@ export default function UserFeed() {
   const handleTagClick = (tag: string) => {
     const name = slug();
     if (!name) return;
-    const q = (query() ? query() + " " : "") + `tag:${tag.includes(" ") ? `"${tag}"` : tag}`;
+    const q =
+      (query() ? query() + " " : "") +
+      `tag:${tag.includes(" ") ? `"${tag}"` : tag}`;
     setQuery(q);
     setActiveQuery(q);
     page = 1;
@@ -192,11 +201,21 @@ export default function UserFeed() {
                   >
                     <BdsmlrIcon />
                   </a>
-                  <A href={`/${slug()}/following`} class="download-btn" title="Following">
-                    Following
-                  </A>
-                  <A href={`/${slug()}`} class="download-btn" title="Feed">
+                  <A
+                    href={`/${slug()}`}
+                    class="download-btn"
+                    classList={{ 'download-btn-active': location.pathname === `/${slug()}` }}
+                    title="Feed"
+                  >
                     Feed
+                  </A>
+                  <A
+                    href={`/${slug()}/following`}
+                    class="download-btn"
+                    classList={{ 'download-btn-active': location.pathname === `/${slug()}/following` }}
+                    title="Following"
+                  >
+                    Following
                   </A>
                 </div>
               </div>
@@ -238,7 +257,9 @@ export default function UserFeed() {
       <Show when={showAllTags()}>
         <div
           class="tag-modal-backdrop"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowAllTags(false); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAllTags(false);
+          }}
         >
           <div class="tag-modal" tabIndex={0}>
             <button
@@ -256,7 +277,10 @@ export default function UserFeed() {
                   <button
                     type="button"
                     class="tag"
-                    onClick={() => { handleTagClick(t.name); setShowAllTags(false); }}
+                    onClick={() => {
+                      handleTagClick(t.name);
+                      setShowAllTags(false);
+                    }}
                   >
                     <span class="tag-name">{t.name}</span>
                     <span class="tag-count">{t.postsCount}</span>
@@ -413,7 +437,10 @@ function PostCard(props: {
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
-  const imageUrls = () => mediaItems().filter((i) => i.type === "image").map((i) => i.url);
+  const imageUrls = () =>
+    mediaItems()
+      .filter((i) => i.type === "image")
+      .map((i) => i.url);
 
   const contentHtml = () => {
     const c = post.content;
@@ -505,9 +532,15 @@ function PostCard(props: {
         </div>
       )}
       <div class="feed-card-meta">
-        <span><HeartIcon /> {post.likesCount ?? 0}</span>
-        <span><ChatIcon /> {post.commentsCount ?? 0}</span>
-        <span><ReblogIcon /> {post.reblogsCount ?? 0}</span>
+        <span>
+          <HeartIcon /> {post.likesCount ?? 0}
+        </span>
+        <span>
+          <ChatIcon /> {post.commentsCount ?? 0}
+        </span>
+        <span>
+          <ReblogIcon /> {post.reblogsCount ?? 0}
+        </span>
         <Show when={imageUrls().length > 0}>
           <button
             type="button"

@@ -830,6 +830,11 @@ button:disabled {
   color: var(--text-heading);
 }
 
+.download-btn-active {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
 .lightbox-backdrop {
   position: fixed;
   inset: 0;

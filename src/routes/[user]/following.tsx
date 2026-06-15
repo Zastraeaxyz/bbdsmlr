@@ -1,5 +1,5 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
-import { useParams, A } from '@solidjs/router'
+import { useParams, useLocation, A } from '@solidjs/router'
 import { Title } from '@solidjs/meta'
 import { resolveIdentifier, blogFollowGraph, getBlog, type FollowEdge, type Blog } from '~/lib/api'
 import Header from '~/components/Header'
@@ -8,6 +8,7 @@ import { BdsmlrIcon } from '~/components/Icons'
 export default function FollowingPage() {
   const params = useParams()
   const slug = () => params.user
+  const location = useLocation()
 
   const [blog, setBlog] = createSignal<Blog | null>(null)
   const [following, setFollowing] = createSignal<FollowEdge[]>([])
@@ -82,8 +83,21 @@ export default function FollowingPage() {
                   >
                     <BdsmlrIcon />
                   </a>
-                  <A href={`/${slug()}`} class="download-btn" title="Feed">
+                  <A
+                    href={`/${slug()}`}
+                    class="download-btn"
+                    classList={{ 'download-btn-active': location.pathname === `/${slug()}` }}
+                    title="Feed"
+                  >
                     Feed
+                  </A>
+                  <A
+                    href={`/${slug()}/following`}
+                    class="download-btn"
+                    classList={{ 'download-btn-active': location.pathname === `/${slug()}/following` }}
+                    title="Following"
+                  >
+                    Following
                   </A>
                 </div>
               </div>
