@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js'
+import { createSignal, For } from 'solid-js'
 
 interface Props {
   onFill: (query: string) => void
@@ -37,19 +37,21 @@ export default function SearchHelp(props: Props) {
           <p class="search-help-title">Query syntax</p>
           <p class="search-help-hint">Click an example to load it into the query field.</p>
           <div class="search-help-examples">
-            {examples.map((ex) => (
-              <button
-                type="button"
-                class="search-help-example"
-                onClick={() => {
-                  props.onFill(ex.query)
-                  setOpen(false)
-                }}
-              >
-                <code>{ex.query}</code>
-                <span>{ex.desc}</span>
-              </button>
-            ))}
+            <For each={examples}>
+              {(ex) => (
+                <button
+                  type="button"
+                  class="search-help-example"
+                  onClick={() => {
+                    props.onFill(ex.query)
+                    setOpen(false)
+                  }}
+                >
+                  <code>{ex.query}</code>
+                  <span>{ex.desc}</span>
+                </button>
+              )}
+            </For>
           </div>
         </div>
       )}

@@ -11,18 +11,18 @@ import {
   type Post,
   type TopTag,
   type Blog,
-} from "../lib/api";
+} from "~/lib/api";
 import {
   sanitizeHtml,
   processContentHtml,
   transformMediaUrl,
   getMediaType,
   type MediaType,
-} from "../lib/sanitize";
-import Header from "../components/Header";
-import SearchHelp from "../components/SearchHelp";
-import { ReblogAttribution } from "../components/ReblogAttribution";
-import { LightBox } from "../components/LightBox";
+} from "~/lib/sanitize";
+import Header from "~/components/Header";
+import SearchHelp from "~/components/SearchHelp";
+import { ReblogAttribution } from "~/components/ReblogAttribution";
+import { LightBox } from "~/components/LightBox";
 
 const PAGE_SIZE = 20;
 
@@ -166,10 +166,8 @@ export default function UserFeed() {
           </A>
         )}
       </Header>
-      {(() => {
-        const b = blog();
-        if (!b) return null;
-        return (
+      <Show when={blog()}>
+        {(b) => (
           <section class="blog-header">
             <div class="blog-header-inner">
               {b.avatarUrl && (
@@ -183,8 +181,8 @@ export default function UserFeed() {
               </div>
             </div>
           </section>
-        );
-      })()}
+        )}
+      </Show>
 
       {topTags().length > 0 && (
         <section class="top-tags">

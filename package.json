@@ -4,21 +4,31 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "vite start",
     "preview": "vite preview",
     "swagger:fetch": "./scripts/fetch-swagger.sh",
     "swagger:generate": "swagger-typescript-api generate -p src/lib/api/openapi.json -o src/lib/api -n client.ts --modular --axios",
     "swagger:update": "npm run swagger:fetch && npm run swagger:generate"
   },
   "dependencies": {
-    "@solidjs/router": "^0.16.1",
-    "solid-js": "^1.9.12"
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.0",
+    "@solidjs/start": "2.0.0-alpha.2",
+    "@solidjs/vite-plugin-nitro-2": "^0.1.0",
+    "solid-js": "^1.9.12",
+    "vite": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.12.3",
     "swagger-typescript-api": "^13.12.2",
-    "typescript": "~6.0.2",
-    "vite": "^8.0.12",
-    "vite-plugin-solid": "^2.11.12"
+    "typescript": "~6.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }

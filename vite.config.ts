@@ -1,15 +1,7 @@
-import { defineConfig } from 'vite'
-import solid from 'vite-plugin-solid'
+import { defineConfig } from "vite";
+import { nitroV2Plugin as nitro } from "@solidjs/vite-plugin-nitro-2";
+import { solidStart } from "@solidjs/start/config";
 
 export default defineConfig({
-  plugins: [solid()],
-  server: {
-    proxy: {
-      '/v2/api': {
-        target: 'https://api-prod.bdsmlr.com',
-        changeOrigin: true,
-        secure: true,
-      },
-    },
-  },
-})
+  plugins: [solidStart(), nitro()],
+});

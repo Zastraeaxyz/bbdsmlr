@@ -1,14 +1,15 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
-import { A } from '@solidjs/router'
-import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '../lib/api'
-import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '../lib/sanitize'
-import Header from '../components/Header'
-import SearchHelp from '../components/SearchHelp'
-import { ReblogAttribution } from '../components/ReblogAttribution'
-import { LightBox } from '../components/LightBox'
+import { A, Navigate } from '@solidjs/router'
+import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '~/lib/api'
+import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
+import Header from '~/components/Header'
+import SearchHelp from '~/components/SearchHelp'
+import { ReblogAttribution } from '~/components/ReblogAttribution'
+import { LightBox } from '~/components/LightBox'
 
-export default function FollowingFeed() {
+export default function Home() {
   const user = getCurrentUser()
+  if (!user) return <Navigate href="/login" />
 
   const [posts, setPosts] = createSignal<Post[]>([])
   const [loading, setLoading] = createSignal(true)
@@ -237,12 +238,14 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
       </div>
       <ReblogAttribution originBlogName={post.originBlogName} originPostId={post.originPostId} variant={post.variant} />
       {post.title && <div class="feed-card-title">{post.title}</div>}
-      {contentHtml() && <div class="feed-card-body" innerHTML={contentHtml()!} onClick={(e) => {
-        const target = e.target as HTMLElement
-        if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
-          props.onImageClick?.(target.getAttribute('src')!)
-        }
-      }} />}
+      {contentHtml() && (
+        <div class="feed-card-body" innerHTML={contentHtml()!} onClick={(e) => {
+          const target = e.target as HTMLElement
+          if ((target.tagName === 'IMG' || target.tagName === 'VIDEO') && target.getAttribute('src')) {
+            props.onImageClick?.(target.getAttribute('src')!)
+          }
+        }} />
+      )}
       {post.type !== PostType.Text && mediaItems().length > 0 && (
         <div class="feed-card-images">
           <For each={mediaItems()}>

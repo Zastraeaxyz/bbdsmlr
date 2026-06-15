@@ -1,10 +1,10 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
-import { getCurrentUser, getPostDetail, PostType, PostVariant, type Post } from '../lib/api'
-import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '../lib/sanitize'
-import Header from '../components/Header'
-import { ReblogAttribution } from '../components/ReblogAttribution'
-import { LightBox } from '../components/LightBox'
+import { getCurrentUser, getPostDetail, PostType, PostVariant, type Post } from '~/lib/api'
+import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
+import Header from '~/components/Header'
+import { ReblogAttribution } from '~/components/ReblogAttribution'
+import { LightBox } from '~/components/LightBox'
 
 export default function PostPage() {
   const params = useParams()
