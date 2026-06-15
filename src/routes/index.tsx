@@ -1,6 +1,6 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
-import { A, Navigate } from '@solidjs/router'
-import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '~/lib/api'
+import { A, useNavigate } from '@solidjs/router'
+import { getCurrentUser, setCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '~/lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
 import Header from '~/components/Header'
 import SearchHelp from '~/components/SearchHelp'
@@ -8,8 +8,28 @@ import { ReblogAttribution } from '~/components/ReblogAttribution'
 import { LightBox } from '~/components/LightBox'
 
 export default function Home() {
-  const user = getCurrentUser()
-  if (!user) return <Navigate href="/login" />
+  const navigate = useNavigate()
+  const [user, setUser] = createSignal(getCurrentUser())
+  const [ready, setReady] = createSignal(false)
+
+  createEffect(() => {
+    let u = user()
+    if (!u) {
+      try {
+        const stored = localStorage.getItem('user')
+        if (stored) {
+          u = JSON.parse(stored)
+          setCurrentUser(u)
+          setUser(u)
+        }
+      } catch {}
+    }
+    if (!u) {
+      navigate('/login', { replace: true })
+      return
+    }
+    setReady(true)
+  })
 
   const [posts, setPosts] = createSignal<Post[]>([])
   const [loading, setLoading] = createSignal(true)
@@ -31,8 +51,8 @@ export default function Home() {
       setPosts((prev) => [...prev, ...incoming])
       if (incoming.length < 20) setHasMore(false)
     } else {
-      if (!user?.blog_id) return
-      const graph = await blogFollowGraph(user.blog_id)
+      if (!user()?.blog_id) return
+      const graph = await blogFollowGraph(user()!.blog_id!)
       const following = graph.following || []
       if (following.length === 0) {
         setPosts([])
@@ -45,7 +65,7 @@ export default function Home() {
   }
 
   const fetchFeed = async () => {
-    if (!user?.blog_id) {
+    if (!user()?.blog_id) {
       setError('Not authenticated')
       setLoading(false)
       return
@@ -66,6 +86,7 @@ export default function Home() {
   }
 
   createEffect(() => {
+    if (!ready()) return
     fetchFeed()
   })
 
@@ -117,76 +138,78 @@ export default function Home() {
   }
 
   return (
-    <div class="home-page">
-      <Header info="Following feed">
-        {user && <A href={`/${user.blog_name}`} class="btn-ghost">My blog</A>}
-        {user && <A href="/liked" class="btn-ghost">Liked</A>}
-      </Header>
-      <main>
-        <form class="search-bar" onSubmit={doSearch}>
-          <select
-            class="sort-select"
-            value={sortField() + '-' + sortOrder()}
-            onChange={(e) => {
-              const [sf, so] = e.currentTarget.value.split('-').map(Number)
-              setSortField(sf)
-              setSortOrder(so)
-              page = 1
-              setPosts([])
-              setHasMore(true)
-              loadPage()
-            }}
-          >
-            <option value="1-1">Newest</option>
-            <option value="1-2">Oldest</option>
-            <option value="6-1">Most popular</option>
-            <option value="6-2">Least popular</option>
-            <option value="2-1">Most liked</option>
-            <option value="3-1">Most commented</option>
-            <option value="4-1">Most reblogged</option>
-          </select>
-          <div class="search-input-wrap">
-            <input
-              type="text"
-              placeholder="Search posts…"
-              value={query()}
-              onInput={(e) => setQuery(e.currentTarget.value)}
-            />
-            {activeQuery() && (
-              <button type="button" class="search-input-clear" onClick={clearSearch}>
-                ×
-              </button>
-            )}
-          </div>
-          <button type="submit">Search</button>
-          <SearchHelp onFill={(q) => { setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage() }} />
-        </form>
-
-        {error() && <p class="error">{error()}</p>}
-
-        {loading() && <p class="loading">Loading feed…</p>}
-
-        <Show when={!loading()}>
-          <Show when={posts().length > 0} fallback={<p class="empty">{activeQuery() ? 'No results found.' : 'No posts from followed blogs.'}</p>}>
-            <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
+    <Show when={ready()} fallback={null}>
+      <div class="home-page">
+        <Header info="Following feed">
+          {user() && <A href={`/${user()!.blog_name}`} class="btn-ghost">My blog</A>}
+          {user() && <A href="/liked" class="btn-ghost">Liked</A>}
+        </Header>
+        <main>
+          <form class="search-bar" onSubmit={doSearch}>
+            <select
+              class="sort-select"
+              value={sortField() + '-' + sortOrder()}
+              onChange={(e) => {
+                const [sf, so] = e.currentTarget.value.split('-').map(Number)
+                setSortField(sf)
+                setSortOrder(so)
+                page = 1
+                setPosts([])
+                setHasMore(true)
+                loadPage()
+              }}
+            >
+              <option value="1-1">Newest</option>
+              <option value="1-2">Oldest</option>
+              <option value="6-1">Most popular</option>
+              <option value="6-2">Least popular</option>
+              <option value="2-1">Most liked</option>
+              <option value="3-1">Most commented</option>
+              <option value="4-1">Most reblogged</option>
+            </select>
+            <div class="search-input-wrap">
+              <input
+                type="text"
+                placeholder="Search posts…"
+                value={query()}
+                onInput={(e) => setQuery(e.currentTarget.value)}
+              />
+              {activeQuery() && (
+                <button type="button" class="search-input-clear" onClick={clearSearch}>
+                  ×
+                </button>
+              )}
             </div>
-          </Show>
-        </Show>
+            <button type="submit">Search</button>
+            <SearchHelp onFill={(q) => { setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage() }} />
+          </form>
 
-        {hasMore() && !loading() && (
-          <button
-            onClick={loadMore}
-            disabled={loadingMore()}
-            class="btn-ghost"
-            style="display:block;margin:24px auto"
-          >
-            {loadingMore() ? 'Loading…' : 'Load more'}
-          </button>
-        )}
-      </main>
-      <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
-    </div>
+          {error() && <p class="error">{error()}</p>}
+
+          {loading() && <p class="loading">Loading feed…</p>}
+
+          <Show when={!loading()}>
+            <Show when={posts().length > 0} fallback={<p class="empty">{activeQuery() ? 'No results found.' : 'No posts from followed blogs.'}</p>}>
+              <div class="feed">
+                <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
+              </div>
+            </Show>
+          </Show>
+
+          {hasMore() && !loading() && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore()}
+              class="btn-ghost"
+              style="display:block;margin:24px auto"
+            >
+              {loadingMore() ? 'Loading…' : 'Load more'}
+            </button>
+          )}
+        </main>
+        <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
+      </div>
+    </Show>
   )
 }
 
