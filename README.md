@@ -22,7 +22,37 @@ A read-only browser client for [BDSMLR](https://bdsmlr.com/). Log in, follow you
 
 ## Disclaimer
 
-I will not deploy or host a public instance of this app for legal reasons. You **must self-host** if you want to use it. A downloadable desktop version may come in the future for ease of use.
+I will not deploy or host a public instance of this app for legal reasons. You **must self-host** if you want to use it. A downloadable desktop version is available for Windows.
+
+## Desktop app (Windows)
+
+The desktop app is a single `.exe` that runs the web server in the background and lives in the Windows system tray. Right-click the tray icon to open the app in your browser or quit.
+
+### Download a pre-built release
+
+1. Go to the [Releases](https://github.com/yourname/bbdmslr/releases) page.
+2. Download the latest `BetterBDSMLR-vX.X.X-windows.zip`.
+3. Extract the zip anywhere.
+4. Run `BetterBDSMLR.exe`.
+5. Right-click the system tray icon and select **Open in Browser**.
+
+### Build the desktop app yourself
+
+You need Node.js 22+ and pnpm.
+
+```bash
+pnpm install
+pnpm desktop:build
+```
+
+The output will be in `dist-desktop/`. Zip that folder and distribute it.
+
+### How it works
+
+- The app is a **Node.js Single Executable Application (SEA)**. The entire Node.js runtime is embedded in the `.exe`.
+- The web server starts automatically on launch.
+- Your data (database and downloads) is stored in `%APPDATA%\BetterBDSMLR`.
+- The server runs on **port 3000**.
 
 ## Running the app in Docker
 

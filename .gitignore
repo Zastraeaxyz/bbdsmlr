@@ -10,9 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-desktop
 .output
 .nitro
 *.local
+sea-prep.blob
 
 # Editor directories and files
 .vscode/*
