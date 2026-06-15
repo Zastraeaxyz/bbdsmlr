@@ -113,9 +113,11 @@ button:disabled {
 .login-page {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  gap: 16px;
 }
 
 .login-page form {
@@ -140,6 +142,53 @@ button:disabled {
   color: var(--text-muted);
   font-size: 14px;
   margin-top: -8px;
+}
+
+.login-disclaimer {
+  max-width: 380px;
+  padding: 16px 20px;
+  background: rgba(248, 81, 73, 0.08);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.login-disclaimer h2 {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.login-disclaimer p {
+  margin-bottom: 10px;
+}
+
+.login-disclaimer p:last-child {
+  margin-bottom: 0;
+}
+
+.login-ack {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.login-ack input[type="checkbox"] {
+  width: auto;
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.login-ack span {
+  text-decoration: underline;
+  font-weight: 500;
 }
 
 /* ---- Home ---- */
