@@ -1,0 +1,11 @@
+services:
+  bbdmslr:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - drizzle-data:/app/drizzle/data
+    restart: unless-stopped
+
+volumes:
+  drizzle-data:

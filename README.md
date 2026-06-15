@@ -34,8 +34,9 @@ The app listens on **port 3000** by default.
 ### Via Docker
 
 ```bash
-docker build -t bbdmslr .
-docker run -d -p 3000:3000 bbdmslr
+docker compose up -d
 ```
+
+The app listens on **port 3000**. A named volume (`drizzle-data`) persists the SQLite database across restarts.
 
 Then open [http://localhost:3000](http://localhost:3000).
