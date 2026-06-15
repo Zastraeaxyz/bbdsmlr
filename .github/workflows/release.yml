@@ -22,8 +22,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install dependencies
         run: pnpm install
@@ -41,6 +39,7 @@ jobs:
         with:
           name: BetterBDSMLR-windows
           path: BetterBDSMLR-${{ github.ref_name }}-windows.zip
+          if-no-files-found: error
 
   release:
     needs: build-windows
@@ -53,16 +52,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: BetterBDSMLR-windows
+          path: .
 
       - name: Extract latest changelog entry
         run: |
           awk '/^## \[.*\].*-[0-9]/ { if (found) exit; found=1; print; next } found { print }' CHANGELOG.md > /tmp/release_notes.md
 
       - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: /tmp/release_notes.md
+          files: |
+            BetterBDSMLR-${{ github.ref_name }}-windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "${{ github.ref_name }}" \
-            --notes-file /tmp/release_notes.md \
-            "BetterBDSMLR-${{ github.ref_name }}-windows.zip"
