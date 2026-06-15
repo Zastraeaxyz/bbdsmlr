@@ -24,6 +24,8 @@ async function proxy(event: APIEvent) {
     }
   }
 
+  clean.headers.set('Cache-Control', 'public, max-age=60');
+
   return clean;
 }
 
