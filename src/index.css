@@ -679,6 +679,23 @@ button:disabled {
   height: 16px;
 }
 
+.download-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.download-btn:hover {
+  color: var(--text-heading);
+}
+
 .lightbox-backdrop {
   position: fixed;
   inset: 0;
@@ -732,4 +749,109 @@ button:disabled {
 
 .lightbox-close:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* ---- Download Modal ---- */
+
+.download-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+  padding: 20px;
+}
+
+.download-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  cursor: default;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  outline: none;
+}
+
+.download-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.download-modal-close:hover {
+  color: var(--text-heading);
+  background: var(--bg-hover);
+}
+
+.download-modal h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-heading);
+  padding-right: 40px;
+}
+
+.download-modal-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.download-modal-preview-item {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.download-modal-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.download-modal-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.download-modal-option input {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.download-modal-submit {
+  width: 100%;
 }

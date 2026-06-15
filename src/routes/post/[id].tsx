@@ -18,7 +18,9 @@ import {
 import Header from "~/components/Header";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
-import { HeartIcon, ChatIcon, ReblogIcon } from "~/components/Icons";
+import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon } from "~/components/Icons";
+import { DownloadModal } from "~/components/DownloadModal";
+import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
 
 export default function PostPage() {
@@ -86,6 +88,17 @@ function PostDetail(props: {
   post: Post;
   onImageClick?: (url: string) => void;
 }) {
+  const [showDownloadModal, setShowDownloadModal] = createSignal(false);
+
+  const handleDownloadClick = () => {
+    const urls = imageUrls();
+    if (urls.length === 1) {
+      downloadImages({ urls, blogName: props.post.blogName, postId: props.post.id });
+    } else {
+      setShowDownloadModal(true);
+    }
+  };
+
   const postTypeLabel = (type?: number) => {
     switch (type) {
       case 0:
@@ -120,6 +133,8 @@ function PostDetail(props: {
           : [];
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
+
+  const imageUrls = () => mediaItems().filter((i) => i.type === "image").map((i) => i.url);
 
   const contentHtml = () => {
     const c = props.post.content;
@@ -216,7 +231,25 @@ function PostDetail(props: {
         <span>
           <ReblogIcon /> {props.post.reblogsCount ?? 0}
         </span>
+        <Show when={imageUrls().length > 0}>
+          <button
+            type="button"
+            class="download-btn"
+            title="Download images"
+            onClick={handleDownloadClick}
+          >
+            <DownloadIcon />
+          </button>
+        </Show>
       </div>
+      <Show when={showDownloadModal()}>
+        <DownloadModal
+          urls={imageUrls()}
+          blogName={props.post.blogName}
+          postId={props.post.id}
+          onClose={() => setShowDownloadModal(false)}
+        />
+      </Show>
     </article>
   );
 }
