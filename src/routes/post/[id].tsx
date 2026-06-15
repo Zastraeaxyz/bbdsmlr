@@ -153,6 +153,9 @@ function PostDetail(props: {
           {props.post.blogName}
         </A>
         <span class="feed-card-type">{postTypeLabel(props.post.type)}</span>
+        <Show when={!props.post.id}>
+          <span class="feed-card-type">DELETED</span>
+        </Show>
         {props.post.createdAtUnix && (
           <span class="post-detail-time">
             {formatRelativeDate(props.post.createdAtUnix)}

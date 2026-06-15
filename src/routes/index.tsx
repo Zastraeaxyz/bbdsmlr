@@ -338,6 +338,9 @@ function PostCard(props: {
           {post.blogName}
         </A>
         <span class="feed-card-type">{postTypeLabel(post.type)}</span>
+        <Show when={!post.id}>
+          <span class="feed-card-type">DELETED</span>
+        </Show>
         {post.createdAtUnix && (
           <span class="feed-card-time">
             {formatRelativeDate(post.createdAtUnix)}
@@ -427,9 +430,11 @@ function PostCard(props: {
             <DownloadIcon />
           </button>
         </Show>
-        <A href={`/post/${post.id}`} class="feed-card-permalink">
-          Permalink
-        </A>
+        <Show when={post.id}>
+          <A href={`/post/${post.id}`} class="feed-card-permalink">
+            Permalink
+          </A>
+        </Show>
       </div>
       <Show when={showDownloadModal()}>
         <DownloadModal

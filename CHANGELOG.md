@@ -23,3 +23,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reblog tracking** — See who originally posted content and jump straight to the original post.
 - **Fixed Media** — Using old source urls to allow images/gifs/videos to play like they once did.
 - **Smooth media** — Images, GIFs, and videos display smoothly in your feed. Animated GIFs play automatically.
+- **Deleted posts** — Posts from deleted authors now show a "DELETED" flair so you know why they can't be opened, and their permalinks are hidden.
