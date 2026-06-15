@@ -3,6 +3,7 @@
 1. Never commit or push unless explicitly requested by the user.
 2. Always use conventional commits style (e.g. `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, etc.).
 3. This is a SolidJS repository, not a React repository. You may not do inline maps or inline IIFEs in JSX, as those break Solid's ability to track elements. Use `<For>` instead of `.map()` and `<Show>` instead of conditional IIFEs.
+4. Every commit that introduces a user-facing change must update `CHANGELOG.md` before committing. For additions and non-breaking changes, write entries in UX language: describe what the user can now do, see, or experience. For fixes and breaking changes, you may explain why at a more technical level when relevant or useful to the consumer. Keep entries concise. Use existing entries in the file as examples.
 
 # API quirks
 
