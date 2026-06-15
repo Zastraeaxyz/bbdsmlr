@@ -7,16 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-15
+
 ### Added
 
+- **Docker support** — The app can now be deployed with Docker. A multi-stage `Dockerfile` produces a lean production image, and `docker-compose.yml` wires it together with a persistent SQLite volume.
+- **SQLite database infrastructure** — Added a SQLite database layer with Drizzle ORM, laying the groundwork for persisting server-side state such as download jobs.
 - **Header view transition** — The header now animates smoothly during page navigations using the View Transitions API.
 - **User dropdown in navbar** — The navbar now shows your avatar and username instead of a plain "Sign out" button. Clicking it opens a dropdown with a "Following" shortcut and a "Sign out" button. The dropdown closes on outside click or Escape.
-- **Following page** — Visit `/:username/following` to see every blog a user follows, with links to each profile. The navbar has a `Following` shortcut for the current user.
+- **Following page** — Visit `/:username/following` to see every blog a user follows, with each blog's avatar, title, description, creation date, and following count. The navbar has a `Following` shortcut for the current user.
 - **Profile Following button** — Every user profile page now has a "Following" button next to the BDSMLR icon that links to the user's following list.
+- **Following and Feed button bolding** — Active Feed/Following buttons are now bold on profile and following pages for clearer navigation state.
+- **Shared layout for user routes** — User routes now share a persistent layout with a sticky blog-header, improving navigation consistency.
+
+### Changed
+
+- **Cache-control for API proxy** — Proxied API responses now include a 60-second `Cache-Control` header to reduce redundant requests.
 
 ### Fixed
 
 - **Avatar refetch on navigation** — The header no longer re-fetches the current user's avatar on every page navigation; the result is cached for the session.
+- **Null-safe avatar** — Fixed a guard against null `title` and `blogName` in the avatar placeholder. Blogs without avatars now correctly show a letter placeholder.
+- **Pagination in blog-follow-graph** — The blog-follow-graph request now fetches all pages instead of stopping after the first page.
+- **Dockerfile duplicate install** — Removed duplicate `pnpm install` from the Dockerfile final stage.
+- **Server startup** — The Docker image now runs the built server directly instead of via `pnpm start`.
+- **PORT environment** — The Docker Compose file explicitly sets `PORT=3000` to match the container's exposed port.
 
 ## [0.2.0] - 2026-06-15
 
