@@ -1,18 +1,15 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
-import { useParams, useLocation, A } from "@solidjs/router";
-import { Title } from "@solidjs/meta";
+import { useParams, A } from "@solidjs/router";
 import {
   resolveIdentifier,
   listBlogActivity,
   listBlogTopTags,
-  getBlog,
   PostType,
   PostVariant,
   SortField,
   SortOrder,
   type Post,
   type TopTag,
-  type Blog,
 } from "~/lib/api";
 import SortDropdown from "~/components/SortDropdown";
 import {
@@ -22,7 +19,6 @@ import {
   getMediaType,
   type MediaType,
 } from "~/lib/sanitize";
-import Header from "~/components/Header";
 import SearchHelp from "~/components/SearchHelp";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
@@ -42,11 +38,9 @@ const PAGE_SIZE = 20;
 export default function UserFeed() {
   const params = useParams();
   const slug = () => params.user;
-  const location = useLocation();
 
   const [posts, setPosts] = createSignal<Post[]>([]);
   const [topTags, setTopTags] = createSignal<TopTag[]>([]);
-  const [blog, setBlog] = createSignal<Blog | null>(null);
   const [loading, setLoading] = createSignal(true);
   const [loadingMore, setLoadingMore] = createSignal(false);
   const [hasMore, setHasMore] = createSignal(true);
@@ -107,11 +101,7 @@ export default function UserFeed() {
       resolvedId = resolved.blogId;
       await loadPage(name);
 
-      const [blogRes, tagsRes] = await Promise.all([
-        getBlog(resolved.blogId),
-        listBlogTopTags(name),
-      ]);
-      setBlog(blogRes.blog ?? null);
+      const tagsRes = await listBlogTopTags(name);
       setTopTags(tagsRes.tags ?? []);
     } catch (err: unknown) {
       setError((err as Error)?.message || "Failed to load feed");
@@ -176,53 +166,7 @@ export default function UserFeed() {
   };
 
   return (
-    <div class="home-page">
-      <Title>{slug()} — bbdsmlr</Title>
-      <Header info={slug()} />
-      <Show when={blog()}>
-        {(b) => (
-          <section class="blog-header">
-            <div class="blog-header-inner">
-              {b().avatarUrl && (
-                <img class="blog-avatar" src={b().avatarUrl} alt="" />
-              )}
-              <div class="blog-header-info">
-                {b().title && <h2 class="blog-title">{b().title}</h2>}
-                {b().description && (
-                  <p class="blog-description">{b().description}</p>
-                )}
-                <div style="display:flex;gap:12px;margin-top:8px">
-                  <a
-                    href={`https://bdsmlr.com/blog/${slug()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="download-btn"
-                    title="Open on BDSMLR"
-                  >
-                    <BdsmlrIcon />
-                  </a>
-                  <A
-                    href={`/${slug()}`}
-                    class="download-btn"
-                    classList={{ 'download-btn-active': location.pathname === `/${slug()}` }}
-                    title="Feed"
-                  >
-                    Feed
-                  </A>
-                  <A
-                    href={`/${slug()}/following`}
-                    class="download-btn"
-                    classList={{ 'download-btn-active': location.pathname === `/${slug()}/following` }}
-                    title="Following"
-                  >
-                    Following
-                  </A>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-      </Show>
+    <>
 
       {topTags().length > 0 && (
         <section class="top-tags">
@@ -381,7 +325,7 @@ export default function UserFeed() {
         )}
       </main>
       <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
-    </div>
+    </>
   );
 }
 
