@@ -25,7 +25,7 @@ import Header from "~/components/Header";
 import SearchHelp from "~/components/SearchHelp";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
-import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon } from "~/components/Icons";
+import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon, BdsmlrIcon } from "~/components/Icons";
 import { DownloadModal } from "~/components/DownloadModal";
 import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
@@ -425,6 +425,17 @@ function PostCard(props: {
           >
             <DownloadIcon />
           </button>
+        </Show>
+        <Show when={post.id}>
+          <a
+            href={`https://bdsmlr.com/post/${post.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="download-btn"
+            title="Open on BDSMLR"
+          >
+            <BdsmlrIcon />
+          </a>
         </Show>
         <Show when={post.id}>
           <A href={`/post/${post.id}`} class="feed-card-permalink">

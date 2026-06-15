@@ -55,6 +55,20 @@ export function ReblogIcon(props: { class?: string }) {
   )
 }
 
+export function BdsmlrIcon(props: { class?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 16 16"
+      class={props.class ?? "icon"}
+    >
+      <path d="M0 0 C5.28 0 10.56 0 16 0 C16 5.28 16 10.56 16 16 C10.72 16 5.44 16 0 16 C0 10.72 0 5.44 0 0 Z " fill="#4F4F4F" transform="translate(0,0)"/>
+      <path d="M0 0 C0.99 0 1.98 0 3 0 C3 2.64 3 5.28 3 8 C3.66 7.67 4.32 7.34 5 7 C4.67 5.68 4.34 4.36 4 3 C5.32 3.33 6.64 3.66 8 4 C8.33 5.65 8.66 7.3 9 9 C6 11 6 11 3.375 10.6875 C1 10 1 10 0 9 C-0.07179964 7.48071962 -0.08392007 5.95832518 -0.0625 4.4375 C-0.05347656 3.61121094 -0.04445312 2.78492188 -0.03515625 1.93359375 C-0.02355469 1.29550781 -0.01195312 0.65742187 0 0 Z " fill="#EEEEEE" transform="translate(4,3)"/>
+    </svg>
+  )
+}
+
 export function DownloadIcon(props: { class?: string }) {
   return (
     <svg
