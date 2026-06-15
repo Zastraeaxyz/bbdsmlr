@@ -124,6 +124,19 @@ export const PostVariant = {
   Reblog: 2,
 } as const
 
+export const SortField = {
+  Date: 1,
+  Likes: 2,
+  Comments: 3,
+  Reblogs: 4,
+  Popularity: 6,
+} as const
+
+export const SortOrder = {
+  Ascending: 1,
+  Descending: 2,
+} as const
+
 export interface PostContent {
   files?: string[]
   thumbnail?: string

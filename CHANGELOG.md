@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Login disclaimer** — The login page now shows a legal disclaimer explaining that this is an alternative front-end to BDSMLR, that all content is user-provided and hosted by BDSMLR, and that you must be of legal age to view adult content. You must check an acknowledgement box before signing in, confirming that the developers own no displayed content and that you comply with BDSMLR's Terms of Service.
+- **Profile search fix** — Searching on user profiles now uses the blog-specific search API again instead of the global tag search.
+- **Sort readability** — Sort field and order values are now expressed as human-readable named constants (`SortField.Date`, `SortOrder.Descending`, etc.) throughout the codebase.
+- **Sort label fix** — Sort dropdowns now correctly label `Date + Descending` as "Newest" and `Date + Ascending` as "Oldest", matching the actual API semantics.
 
 ## [0.1.0] - 2026-06-15
 

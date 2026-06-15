@@ -3,11 +3,13 @@ import { useParams, A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
   resolveIdentifier,
-  searchPostsByTag,
+  listBlogActivity,
   listBlogTopTags,
   getBlog,
   PostType,
   PostVariant,
+  SortField,
+  SortOrder,
   type Post,
   type TopTag,
   type Blog,
@@ -44,8 +46,8 @@ export default function UserFeed() {
   const [query, setQuery] = createSignal("");
   const [activeQuery, setActiveQuery] = createSignal("");
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
-  const [sortField, setSortField] = createSignal(1);
-  const [sortOrder, setSortOrder] = createSignal(2);
+  const [sortField, setSortField] = createSignal(SortField.Date);
+  const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
 
   let resolvedId: number | null = null;
   let page = 1;
@@ -53,10 +55,14 @@ export default function UserFeed() {
   const loadPage = async (name: string) => {
     if (!resolvedId) return;
     const q = activeQuery();
-    const data = await searchPostsByTag({
-      tag_name: ["blog:" + name, q].filter(Boolean).join(" "),
+    const data = await listBlogActivity({
+      blog_id: resolvedId,
+      blog_name: name,
+      ...(q ? { q } : {}),
       sort_field: sortField(),
       order: sortOrder(),
+      post_types: [1, 2, 3, 4, 5, 6, 7],
+      activity_kinds: ["post", "reblog"],
       page,
       page_size: PAGE_SIZE,
     });
@@ -205,7 +211,7 @@ export default function UserFeed() {
         <form class="search-bar" onSubmit={doSearch}>
           <select
             class="sort-select"
-            value={sortField() + "-" + sortOrder()}
+            value={`${sortField()}-${sortOrder()}`}
             onChange={(e) => {
               const [sf, so] = e.currentTarget.value.split("-").map(Number);
               setSortField(sf);
@@ -217,13 +223,13 @@ export default function UserFeed() {
               if (name) loadPage(name);
             }}
           >
-            <option value="1-2">Newest</option>
-            <option value="1-1">Oldest</option>
-            <option value="6-1">Most popular</option>
-            <option value="6-2">Least popular</option>
-            <option value="2-1">Most liked</option>
-            <option value="3-1">Most commented</option>
-            <option value="4-1">Most reblogged</option>
+            <option value={`${SortField.Date}-${SortOrder.Descending}`}>Newest</option>
+            <option value={`${SortField.Date}-${SortOrder.Ascending}`}>Oldest</option>
+            <option value={`${SortField.Popularity}-${SortOrder.Ascending}`}>Most popular</option>
+            <option value={`${SortField.Popularity}-${SortOrder.Descending}`}>Least popular</option>
+            <option value={`${SortField.Likes}-${SortOrder.Ascending}`}>Most liked</option>
+            <option value={`${SortField.Comments}-${SortOrder.Ascending}`}>Most commented</option>
+            <option value={`${SortField.Reblogs}-${SortOrder.Ascending}`}>Most reblogged</option>
           </select>
           <div class="search-input-wrap">
             <input

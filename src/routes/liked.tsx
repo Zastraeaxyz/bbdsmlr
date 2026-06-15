@@ -6,6 +6,8 @@ import {
   listBlogActivity,
   PostType,
   PostVariant,
+  SortField,
+  SortOrder,
   type Post,
 } from "~/lib/api";
 import {
@@ -32,8 +34,8 @@ export default function LikedPosts() {
   const [hasMore, setHasMore] = createSignal(true);
   const [error, setError] = createSignal("");
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
-  const [sortField, setSortField] = createSignal(1);
-  const [sortOrder, setSortOrder] = createSignal(2);
+  const [sortField, setSortField] = createSignal(SortField.Date);
+  const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
   let nextPageToken: string | null = null;
 
   const fetchLiked = async () => {
@@ -116,8 +118,8 @@ export default function LikedPosts() {
               fetchLiked();
             }}
           >
-            <option value="1-2">Newest</option>
-            <option value="1-1">Oldest</option>
+            <option value={`${SortField.Date}-${SortOrder.Ascending}`}>Oldest</option>
+            <option value={`${SortField.Date}-${SortOrder.Descending}`}>Newest</option>
           </select>
         </div>
 

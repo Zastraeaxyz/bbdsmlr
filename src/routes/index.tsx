@@ -9,6 +9,8 @@ import {
   searchPostsByTag,
   PostType,
   PostVariant,
+  SortField,
+  SortOrder,
   type Post,
 } from "~/lib/api";
 import {
@@ -59,8 +61,8 @@ export default function Home() {
   const [query, setQuery] = createSignal("");
   const [activeQuery, setActiveQuery] = createSignal("");
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
-  const [sortField, setSortField] = createSignal(1);
-  const [sortOrder, setSortOrder] = createSignal(2);
+  const [sortField, setSortField] = createSignal(SortField.Date);
+  const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
   let page = 1;
 
   const loadPage = async () => {
@@ -132,8 +134,8 @@ export default function Home() {
   const doSearch = (e: Event) => {
     e.preventDefault();
     setActiveQuery(query());
-    setSortField(1);
-    setSortOrder(1);
+    setSortField(SortField.Date);
+    setSortOrder(SortOrder.Descending);
     page = 1;
     setPosts([]);
     setHasMore(true);
@@ -143,8 +145,8 @@ export default function Home() {
   const clearSearch = () => {
     setQuery("");
     setActiveQuery("");
-    setSortField(1);
-    setSortOrder(1);
+    setSortField(SortField.Date);
+    setSortOrder(SortOrder.Descending);
     page = 1;
     setPosts([]);
     setHasMore(true);
@@ -155,8 +157,8 @@ export default function Home() {
     const q = (query() ? query() + " " : "") + `tag:${tag}`;
     setQuery(q);
     setActiveQuery(q);
-    setSortField(1);
-    setSortOrder(1);
+    setSortField(SortField.Date);
+    setSortOrder(SortOrder.Descending);
     page = 1;
     setPosts([]);
     setHasMore(true);
@@ -172,7 +174,7 @@ export default function Home() {
           <form class="search-bar" onSubmit={doSearch}>
             <select
               class="sort-select"
-              value={sortField() + "-" + sortOrder()}
+              value={`${sortField()}-${sortOrder()}`}
               onChange={(e) => {
                 const [sf, so] = e.currentTarget.value.split("-").map(Number);
                 setSortField(sf);
@@ -183,13 +185,13 @@ export default function Home() {
                 loadPage();
               }}
             >
-              <option value="1-2">Newest</option>
-              <option value="1-1">Oldest</option>
-              <option value="6-1">Most popular</option>
-              <option value="6-2">Least popular</option>
-              <option value="2-1">Most liked</option>
-              <option value="3-1">Most commented</option>
-              <option value="4-1">Most reblogged</option>
+              <option value={`${SortField.Date}-${SortOrder.Descending}`}>Newest</option>
+              <option value={`${SortField.Date}-${SortOrder.Ascending}`}>Oldest</option>
+              <option value={`${SortField.Popularity}-${SortOrder.Ascending}`}>Most popular</option>
+              <option value={`${SortField.Popularity}-${SortOrder.Descending}`}>Least popular</option>
+              <option value={`${SortField.Likes}-${SortOrder.Ascending}`}>Most liked</option>
+              <option value={`${SortField.Comments}-${SortOrder.Ascending}`}>Most commented</option>
+              <option value={`${SortField.Reblogs}-${SortOrder.Ascending}`}>Most reblogged</option>
             </select>
             <div class="search-input-wrap">
               <input
