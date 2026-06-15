@@ -65,7 +65,7 @@ export default function FollowingPage() {
                 {(f) => (
                   <A href={`/${f.blogName}`} class="following-item">
                     <div class="following-item-avatar-wrap">
-                      <Show when={f.avatarUrl} fallback={<span class="following-item-avatar-placeholder">{(f.title || f.blogName)[0]}</span>}>
+                      <Show when={f.avatarUrl} fallback={<span class="following-item-avatar-placeholder">{(f.title || f.blogName || '?')[0]}</span>}>
                         <img class="following-item-avatar" src={f.avatarUrl!} alt="" />
                       </Show>
                     </div>
