@@ -11,16 +11,19 @@ export function transformMediaUrl(url: string): string {
   const qidx = url.indexOf('?')
   const baseUrl = qidx !== -1 ? url.slice(0, qidx) : url
   const query = qidx !== -1 ? url.slice(qidx) : ''
-  const m = baseUrl.match(/^https:\/\/media\.bdsmlr\.com\/feed\/s3:\/\/ocdn(\d+)\.bdsmlr\.com\/(.+)/)
-  if (m) return `https://cdn${m[1]}.bdsmlr.com/${m[2]}${query}`
+  const m = baseUrl.match(/^https:\/\/media\.bdsmlr\.com\/(feed|lightbox)\/s3:\/\/ocdn(\d+)\.bdsmlr\.com\/(.+)/)
+  if (m) return `https://cdn${m[2]}.bdsmlr.com/${m[3]}${query}`
   return url
 }
 
 export function sanitizeHtml(html: string): string {
-  return html.replace(/<[a-z][a-z0-9]*\b[^>]*>/gi, (tag) => {
+  const cleaned = html.replace(/<[a-z][a-z0-9]*\b[^>]*>/gi, (tag) => {
     if (/^<p\b/i.test(tag)) return '<p>'
     return tag.replace(/\sstyle\s*=\s*["'][^"']*["']/gi, '')
   })
+  // Skip empty paragraph content (e.g. <p><br></p>)
+  if (/^\s*<p>\s*<br\b[^>]*>\s*<\/p>\s*$/i.test(cleaned)) return ''
+  return cleaned
 }
 
 export function processContentHtml(html: string, files?: string[]): string {
