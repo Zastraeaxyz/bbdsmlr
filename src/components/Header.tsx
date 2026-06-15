@@ -1,5 +1,7 @@
+import { createSignal, createEffect, Show, onCleanup, onMount } from 'solid-js'
 import { useNavigate, A } from '@solidjs/router'
 import { useAuth } from '../lib/useAuth'
+import { getBlog } from '../lib/api'
 
 interface HeaderProps {
   info?: string
@@ -9,11 +11,47 @@ interface HeaderProps {
 export default function Header(props: HeaderProps) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const [showDropdown, setShowDropdown] = createSignal(false)
+  const [avatarUrl, setAvatarUrl] = createSignal<string | null>(null)
+
+  let containerRef: HTMLDivElement | undefined
 
   const handleSignOut = () => {
+    setShowDropdown(false)
     logout()
     navigate('/login', { replace: true })
   }
+
+  createEffect(() => {
+    const u = user()
+    if (u?.blog_id) {
+      getBlog(u.blog_id).then((res) => {
+        if (res.blog?.avatarUrl) setAvatarUrl(res.blog.avatarUrl)
+      })
+    }
+  })
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (containerRef && !containerRef.contains(e.target as Node)) {
+      setShowDropdown(false)
+    }
+  }
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') setShowDropdown(false)
+  }
+
+  onMount(() => {
+    if (typeof document === 'undefined') return
+    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('keydown', handleKeydown)
+  })
+
+  onCleanup(() => {
+    if (typeof document === 'undefined') return
+    document.removeEventListener('click', handleClickOutside)
+    document.removeEventListener('keydown', handleKeydown)
+  })
 
   return (
     <header>
@@ -24,7 +62,38 @@ export default function Header(props: HeaderProps) {
       {user() && <A href={`/${user()!.blog_name}`} class="btn-ghost">My blog</A>}
       <A href="/liked" class="btn-ghost">Liked</A>
       {user() ? (
-        <button class="btn-ghost" onClick={handleSignOut}>Sign out</button>
+        <div class="user-dropdown" ref={containerRef}>
+          <button
+            type="button"
+            class="btn-ghost user-dropdown-trigger"
+            onClick={() => setShowDropdown(!showDropdown())}
+            aria-haspopup="true"
+            aria-expanded={showDropdown()}
+          >
+            <Show when={avatarUrl()}>
+              <img class="user-dropdown-avatar" src={avatarUrl()!} alt="" />
+            </Show>
+            <span>{user()!.blog_name}</span>
+          </button>
+          <Show when={showDropdown()}>
+            <div class="user-dropdown-menu">
+              <A
+                href="/following"
+                class="user-dropdown-item"
+                onClick={() => setShowDropdown(false)}
+              >
+                Following
+              </A>
+              <button
+                type="button"
+                class="user-dropdown-item"
+                onClick={handleSignOut}
+              >
+                Sign out
+              </button>
+            </div>
+          </Show>
+        </div>
       ) : (
         <A href="/login" class="btn-ghost">Sign in</A>
       )}

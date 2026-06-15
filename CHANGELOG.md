@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **User dropdown in navbar** — The navbar now shows your avatar and username instead of a plain "Sign out" button. Clicking it opens a dropdown with a "Following" shortcut and a "Sign out" button. The dropdown closes on outside click or Escape.
+- **Following page** — Visit `/:username/following` to see every blog a user follows, with links to each profile. The navbar has a `Following` shortcut for the current user.
+- **Profile Following button** — Every user profile page now has a "Following" button next to the BDSMLR icon that links to the user's following list.
+
 ## [0.2.0] - 2026-06-15
 
 ### Added

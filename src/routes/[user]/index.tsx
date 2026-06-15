@@ -182,16 +182,20 @@ export default function UserFeed() {
                 {b().description && (
                   <p class="blog-description">{b().description}</p>
                 )}
-                <a
-                  href={`https://bdsmlr.com/blog/${slug()}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="download-btn"
-                  title="Open on BDSMLR"
-                  style="margin-top:8px"
-                >
-                  <BdsmlrIcon />
-                </a>
+                <div style="display:flex;gap:12px;margin-top:8px">
+                  <a
+                    href={`https://bdsmlr.com/blog/${slug()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="download-btn"
+                    title="Open on BDSMLR"
+                  >
+                    <BdsmlrIcon />
+                  </a>
+                  <A href={`/${slug()}/following`} class="download-btn" title="Following">
+                    Following
+                  </A>
+                </div>
               </div>
             </div>
           </section>
