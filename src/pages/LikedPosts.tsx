@@ -1,13 +1,12 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { A } from '@solidjs/router'
-import { getCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '../lib/api'
+import { getCurrentUser, listBlogActivity, PostType, PostVariant, type Post } from '../lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '../lib/sanitize'
 import Header from '../components/Header'
-import SearchHelp from '../components/SearchHelp'
 import { ReblogAttribution } from '../components/ReblogAttribution'
 import { LightBox } from '../components/LightBox'
 
-export default function FollowingFeed() {
+export default function LikedPosts() {
   const user = getCurrentUser()
 
   const [posts, setPosts] = createSignal<Post[]>([])
@@ -15,35 +14,10 @@ export default function FollowingFeed() {
   const [loadingMore, setLoadingMore] = createSignal(false)
   const [hasMore, setHasMore] = createSignal(true)
   const [error, setError] = createSignal('')
-  const [query, setQuery] = createSignal('')
-  const [activeQuery, setActiveQuery] = createSignal('')
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null)
-  const [sortField, setSortField] = createSignal(1)
-  const [sortOrder, setSortOrder] = createSignal(1)
-  let page = 1
+  let nextPageToken: string | null = null
 
-  const loadPage = async () => {
-    const q = activeQuery()
-    if (q) {
-      const data = await searchPostsByTag({ tag_name: q, sort_field: sortField(), order: sortOrder(), page, page_size: 20 })
-      const incoming = data.posts ?? []
-      setPosts((prev) => [...prev, ...incoming])
-      if (incoming.length < 20) setHasMore(false)
-    } else {
-      if (!user?.blog_id) return
-      const graph = await blogFollowGraph(user.blog_id)
-      const following = graph.following || []
-      if (following.length === 0) {
-        setPosts([])
-        return
-      }
-      const blogIds = following.map((f) => Number(f.blogId))
-      const data = await listBlogsRecentActivity(blogIds, 20)
-      setPosts(data.posts ?? [])
-    }
-  }
-
-  const fetchFeed = async () => {
+  const fetchLiked = async () => {
     if (!user?.blog_id) {
       setError('Not authenticated')
       setLoading(false)
@@ -54,121 +28,70 @@ export default function FollowingFeed() {
     setError('')
     setPosts([])
     setHasMore(true)
-    page = 1
+    nextPageToken = null
     try {
-      await loadPage()
+      const data = await listBlogActivity({
+        blog_id: user.blog_id,
+        sort_field: 1,
+        order: 2,
+        post_types: [1, 2, 3, 4, 5, 6, 7],
+        activity_kinds: ['like'],
+        page: { page_size: 20 },
+      })
+      const incoming = data.posts ?? []
+      setPosts(incoming)
+      nextPageToken = data.page?.nextPageToken ?? null
+      if (!nextPageToken) setHasMore(false)
     } catch (err: unknown) {
-      setError((err as Error)?.message || 'Failed to load feed')
+      setError((err as Error)?.message || 'Failed to load liked posts')
     } finally {
       setLoading(false)
     }
   }
 
   createEffect(() => {
-    fetchFeed()
+    fetchLiked()
   })
 
   const loadMore = async () => {
-    if (!hasMore() || loadingMore()) return
+    if (!user?.blog_id || !hasMore() || loadingMore() || !nextPageToken) return
     setLoadingMore(true)
-    page++
+    const token = nextPageToken
+    nextPageToken = null
     try {
-      await loadPage()
+      const data = await listBlogActivity({
+        blog_id: user.blog_id,
+        sort_field: 1,
+        order: 2,
+        post_types: [1, 2, 3, 4, 5, 6, 7],
+        activity_kinds: ['like'],
+        page: { page_size: 20, page_token: token },
+      })
+      const incoming = data.posts ?? []
+      setPosts((prev) => [...prev, ...incoming])
+      nextPageToken = data.page?.nextPageToken ?? null
+      if (!nextPageToken) setHasMore(false)
     } catch {
-      page--
+      nextPageToken = token
     } finally {
       setLoadingMore(false)
     }
   }
 
-  const doSearch = (e: Event) => {
-    e.preventDefault()
-    setActiveQuery(query())
-    setSortField(1)
-    setSortOrder(1)
-    page = 1
-    setPosts([])
-    setHasMore(true)
-    loadPage()
-  }
-
-  const clearSearch = () => {
-    setQuery('')
-    setActiveQuery('')
-    setSortField(1)
-    setSortOrder(1)
-    page = 1
-    setPosts([])
-    setHasMore(true)
-    fetchFeed()
-  }
-
-  const handleTagClick = (tag: string) => {
-    const q = (query() ? query() + ' ' : '') + `tag:${tag}`
-    setQuery(q)
-    setActiveQuery(q)
-    setSortField(1)
-    setSortOrder(1)
-    page = 1
-    setPosts([])
-    setHasMore(true)
-    loadPage()
-  }
-
   return (
     <div class="home-page">
-      <Header info="Following feed">
-        {user && <A href={`/${user.blog_name}`} class="btn-ghost">My blog</A>}
-        {user && <A href="/liked" class="btn-ghost">Liked</A>}
+      <Header info="Liked posts">
+        {user && <A href="/following" class="btn-ghost">Following</A>}
       </Header>
       <main>
-        <form class="search-bar" onSubmit={doSearch}>
-          <select
-            class="sort-select"
-            value={sortField() + '-' + sortOrder()}
-            onChange={(e) => {
-              const [sf, so] = e.currentTarget.value.split('-').map(Number)
-              setSortField(sf)
-              setSortOrder(so)
-              page = 1
-              setPosts([])
-              setHasMore(true)
-              loadPage()
-            }}
-          >
-            <option value="1-1">Newest</option>
-            <option value="1-2">Oldest</option>
-            <option value="6-1">Most popular</option>
-            <option value="6-2">Least popular</option>
-            <option value="2-1">Most liked</option>
-            <option value="3-1">Most commented</option>
-            <option value="4-1">Most reblogged</option>
-          </select>
-          <div class="search-input-wrap">
-            <input
-              type="text"
-              placeholder="Search posts…"
-              value={query()}
-              onInput={(e) => setQuery(e.currentTarget.value)}
-            />
-            {activeQuery() && (
-              <button type="button" class="search-input-clear" onClick={clearSearch}>
-                ×
-              </button>
-            )}
-          </div>
-          <button type="submit">Search</button>
-          <SearchHelp onFill={(q) => { setQuery(q); setActiveQuery(q); page = 1; setPosts([]); setHasMore(true); loadPage() }} />
-        </form>
-
         {error() && <p class="error">{error()}</p>}
 
-        {loading() && <p class="loading">Loading feed…</p>}
+        {loading() && <p class="loading">Loading liked posts…</p>}
 
         <Show when={!loading()}>
-          <Show when={posts().length > 0} fallback={<p class="empty">{activeQuery() ? 'No results found.' : 'No posts from followed blogs.'}</p>}>
+          <Show when={posts().length > 0} fallback={<p class="empty">No liked posts yet.</p>}>
             <div class="feed">
-              <For each={posts()}>{(post) => <PostCard post={post} onTagClick={handleTagClick} onImageClick={setLightboxUrl} />}</For>
+              <For each={posts()}>{(post) => <PostCard post={post} onImageClick={setLightboxUrl} />}</For>
             </div>
           </Show>
         </Show>
@@ -189,7 +112,7 @@ export default function FollowingFeed() {
   )
 }
 
-function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onImageClick?: (url: string) => void }) {
+function PostCard(props: { post: Post; onImageClick?: (url: string) => void }) {
   const post = props.post
 
   const postTypeLabel = (type?: number) => {
@@ -270,9 +193,7 @@ function PostCard(props: { post: Post; onTagClick?: (tag: string) => void; onIma
       {post.tags && post.tags.length > 0 && (
         <div class="feed-card-tags">
           <For each={post.tags}>{(t) => (
-            <button type="button" class="tag" onClick={() => props.onTagClick?.(t)}>
-              #{t}
-            </button>
+            <span class="tag">#{t}</span>
           )}</For>
         </div>
       )}

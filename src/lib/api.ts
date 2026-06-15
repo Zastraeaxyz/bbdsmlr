@@ -163,7 +163,7 @@ export interface ListBlogActivityRequest {
   order?: number
   post_types?: number[]
   activity_kinds?: string[]
-  page?: number
+  page?: number | { page_size?: number; page_token?: string }
   page_size?: number
 }
 
@@ -246,4 +246,6 @@ export interface GetBlogResponse {
 export function getBlog(blogId: number) {
   return request<GetBlogResponse>(API_BASE, '/get-blog', { blogId: String(blogId) })
 }
+
+
 

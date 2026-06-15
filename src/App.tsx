@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import UserFeed from "./pages/UserFeed";
 import Post from "./pages/Post";
 import FollowingFeed from "./pages/FollowingFeed";
+import LikedPosts from "./pages/LikedPosts";
 import { getCurrentUser, setCurrentUser } from "./lib/api";
 
 function Home() {
@@ -22,6 +23,7 @@ export default function App() {
     <Router>
       <Route path="/login" component={Login} />
       <Route path="/" component={Home} />
+      <Route path="/liked" component={LikedPosts} />
       <Route path="/:user" component={UserFeed} />
       <Route path="/post/:id" component={Post} />
     </Router>
