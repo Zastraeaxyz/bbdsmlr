@@ -52,7 +52,7 @@ export default function FollowingPage() {
       <Title>{slug()} following — bbdsmlr</Title>
       <Header info={`@${slug()}`} />
       <main>
-        <h2 style="margin-bottom:16px">Following</h2>
+        <h2 style="margin-bottom:16px">Following{!loading() ? ` (${following().length})` : ''}</h2>
         {error() && <p class="error">{error()}</p>}
         {loading() && <p class="loading">Loading…</p>}
         <Show when={!loading()}>
