@@ -1,5 +1,6 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
 import { useParams, A } from "@solidjs/router";
+import { Title } from "@solidjs/meta";
 import {
   resolveIdentifier,
   listBlogActivity,
@@ -157,6 +158,7 @@ export default function UserFeed() {
 
   return (
     <div class="home-page">
+      <Title>{slug()} — bbdsmlr</Title>
       <Header info={slug()} />
       <Show when={blog()}>
         {(b) => (

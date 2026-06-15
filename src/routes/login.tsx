@@ -1,5 +1,6 @@
 import { createSignal, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
+import { Title } from "@solidjs/meta";
 import { getCurrentUser, setCurrentUser, login } from "~/lib/api";
 
 export default function Login() {
@@ -38,7 +39,9 @@ export default function Login() {
   };
 
   return (
-    <div class="login-page">
+    <>
+      <Title>Sign in — bbdsmlr</Title>
+      <div class="login-page">
       <form onSubmit={handleSubmit}>
         <h1>BDSMLR</h1>
         <p class="subtitle">Sign in to your account</p>
@@ -74,5 +77,6 @@ export default function Login() {
         </button>
       </form>
     </div>
+    </>
   );
 }

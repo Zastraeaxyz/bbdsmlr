@@ -1,5 +1,6 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { A } from '@solidjs/router'
+import { Title } from '@solidjs/meta'
 import { getCurrentUser, listBlogActivity, PostType, PostVariant, type Post } from '~/lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
 import Header from '~/components/Header'
@@ -80,6 +81,7 @@ export default function LikedPosts() {
 
   return (
     <div class="home-page">
+      <Title>Liked posts — bbdsmlr</Title>
       <Header info="Liked posts" />
       <main>
         {error() && <p class="error">{error()}</p>}

@@ -1,5 +1,6 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { A, useNavigate } from '@solidjs/router'
+import { Title } from '@solidjs/meta'
 import { getCurrentUser, setCurrentUser, blogFollowGraph, listBlogsRecentActivity, searchPostsByTag, PostType, PostVariant, type Post } from '~/lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
 import Header from '~/components/Header'
@@ -139,6 +140,7 @@ export default function Home() {
 
   return (
     <Show when={ready()} fallback={null}>
+      <Title>Following feed — bbdsmlr</Title>
       <div class="home-page">
         <Header info="Following feed" />
         <main>

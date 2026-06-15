@@ -1,5 +1,6 @@
 import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
+import { Title } from '@solidjs/meta'
 import { getCurrentUser, getPostDetail, PostType, PostVariant, type Post } from '~/lib/api'
 import { sanitizeHtml, processContentHtml, transformMediaUrl, getMediaType, type MediaType } from '~/lib/sanitize'
 import Header from '~/components/Header'
@@ -38,6 +39,7 @@ export default function PostPage() {
 
   return (
     <div class="home-page">
+      <Title>{post()?.blogName ? `${post()!.blogName}'s Post — bbdsmlr` : 'Post — bbdsmlr'}</Title>
       <Header info={user?.blog_name || user?.username || undefined}>
         <A href="/" class="btn-ghost">Home</A>
         {user && <A href={`/${user.blog_name}`} class="btn-ghost">My feed</A>}
