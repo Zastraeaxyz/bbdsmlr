@@ -9,13 +9,48 @@ interface SortOption {
 }
 
 const ALL_OPTIONS: SortOption[] = [
-  { field: SortField.Date, order: SortOrder.Descending, label: "Newest", value: "1-2" },
-  { field: SortField.Date, order: SortOrder.Ascending, label: "Oldest", value: "1-1" },
-  { field: SortField.Popularity, order: SortOrder.Ascending, label: "Most popular", value: "6-1" },
-  { field: SortField.Popularity, order: SortOrder.Descending, label: "Least popular", value: "6-2" },
-  { field: SortField.Likes, order: SortOrder.Ascending, label: "Most liked", value: "2-1" },
-  { field: SortField.Comments, order: SortOrder.Ascending, label: "Most commented", value: "3-1" },
-  { field: SortField.Reblogs, order: SortOrder.Ascending, label: "Most reblogged", value: "4-1" },
+  {
+    field: SortField.Date,
+    order: SortOrder.Descending,
+    label: "Newest",
+    value: "1-2",
+  },
+  {
+    field: SortField.Date,
+    order: SortOrder.Ascending,
+    label: "Oldest",
+    value: "1-1",
+  },
+  {
+    field: SortField.Popularity,
+    order: SortOrder.Ascending,
+    label: "Most popular",
+    value: "6-2",
+  },
+  {
+    field: SortField.Popularity,
+    order: SortOrder.Descending,
+    label: "Least popular",
+    value: "6-1",
+  },
+  {
+    field: SortField.Likes,
+    order: SortOrder.Ascending,
+    label: "Most liked",
+    value: "2-2",
+  },
+  {
+    field: SortField.Comments,
+    order: SortOrder.Ascending,
+    label: "Most commented",
+    value: "3-2",
+  },
+  {
+    field: SortField.Reblogs,
+    order: SortOrder.Ascending,
+    label: "Most reblogged",
+    value: "4-2",
+  },
 ];
 
 export interface SortDropdownProps {
@@ -127,7 +162,9 @@ export default function SortDropdown(props: SortDropdownProps) {
               <button
                 type="button"
                 class="sort-dropdown-item"
-                classList={{ "sort-dropdown-item-active": option.value === props.value }}
+                classList={{
+                  "sort-dropdown-item-active": option.value === props.value,
+                }}
                 role="option"
                 aria-selected={option.value === props.value}
                 onClick={() => handleSelect(option)}

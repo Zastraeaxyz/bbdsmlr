@@ -15,6 +15,7 @@ export function transformMediaUrl(url: string): string {
     /^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/ocdn(\d+)\.bdsmlr\.com\/(.+)/,
   );
   if (m) return `https://cdn${m[2]}.bdsmlr.com/${m[3]}${query}`;
+  url.replace("ocdn", "cdn"); // if ocdn is used, lets use cdn instead
   return url;
 }
 
