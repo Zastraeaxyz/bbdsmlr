@@ -1,4 +1,4 @@
-import { createSignal, createEffect, For, Show } from "solid-js";
+import { createSignal, createEffect, For, Show, onCleanup, onMount } from "solid-js";
 import { useParams, A } from "@solidjs/router";
 import {
   resolveIdentifier,
@@ -11,6 +11,7 @@ import {
   type Post,
   type TopTag,
 } from "~/lib/api";
+import { GearIcon } from "~/components/Icons";
 import SortDropdown from "~/components/SortDropdown";
 import {
   sanitizeHtml,
@@ -51,6 +52,40 @@ export default function UserFeed() {
   const [showAllTags, setShowAllTags] = createSignal(false);
   const [sortField, setSortField] = createSignal(SortField.Date);
   const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
+  const [hideReblogs, setHideReblogs] = createSignal(false);
+  const [showSettings, setShowSettings] = createSignal(false);
+  let settingsRef: HTMLDivElement | undefined;
+
+  const toggleHideReblogs = () => {
+    const name = slug();
+    if (!name) return;
+    setHideReblogs((prev) => !prev);
+    setShowSettings(false);
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (settingsRef && !settingsRef.contains(e.target as Node)) {
+      setShowSettings(false);
+    }
+  };
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setShowSettings(false);
+    }
+  };
+
+  onMount(() => {
+    if (typeof document === "undefined") return;
+    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("keydown", handleKeydown);
+  });
+
+  onCleanup(() => {
+    if (typeof document === "undefined") return;
+    document.removeEventListener("click", handleClickOutside);
+    document.removeEventListener("keydown", handleKeydown);
+  });
 
   let resolvedId: number | null = null;
   let page = 1;
@@ -65,7 +100,7 @@ export default function UserFeed() {
       sort_field: sortField(),
       order: sortOrder(),
       post_types: [1, 2, 3, 4, 5, 6, 7],
-      activity_kinds: ["post", "reblog"],
+      activity_kinds: hideReblogs() ? ["post"] : ["post", "reblog"],
       page,
       page_size: PAGE_SIZE,
     });
@@ -74,7 +109,12 @@ export default function UserFeed() {
         data.error === "blog not found" ? "Blog was banned" : data.error;
       throw new Error(msg);
     }
-    const incoming = data.posts ?? [];
+    let incoming = data.posts ?? [];
+    if (hideReblogs()) {
+      incoming = incoming.filter(
+        (p) => p.variant !== PostVariant.Reblog
+      );
+    }
     setPosts((prev) => [...prev, ...incoming]);
     if (incoming.length < PAGE_SIZE) setHasMore(false);
   };
@@ -288,6 +328,29 @@ export default function UserFeed() {
               loadPage(name);
             }}
           />
+          <div class="settings-dropdown" ref={settingsRef}>
+            <button
+              type="button"
+              class="settings-btn"
+              onClick={() => setShowSettings(!showSettings())}
+              aria-label="Settings"
+              aria-expanded={showSettings()}
+            >
+              <GearIcon />
+            </button>
+            <Show when={showSettings()}>
+              <div class="settings-dropdown-menu">
+                <label class="settings-dropdown-item">
+                  <input
+                    type="checkbox"
+                    checked={hideReblogs()}
+                    onChange={toggleHideReblogs}
+                  />
+                  Hide reblogs
+                </label>
+              </div>
+            </Show>
+          </div>
         </form>
 
         {error() && <p class="error">{error()}</p>}

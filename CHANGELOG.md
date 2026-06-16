@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Hide reblogs toggle on profile** — A gear icon next to the search bar now opens a settings dropdown with a "Hide reblogs" checkbox. When checked, only original posts from the creator are shown; reblogged content is hidden.
+
 - **Windows desktop app** — A single-executable Windows app is now available. Run `BetterBDSMLR.exe` and it lives in the system tray. Right-click the tray icon to open the app in your browser or quit. No Docker or Node.js installation required.
 
 ## [0.3.0] - 2026-06-15
