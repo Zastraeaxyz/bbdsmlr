@@ -58,6 +58,8 @@ export default function Home() {
         tag_name: q,
         sort_field: sortField(),
         order: sortOrder(),
+        post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
+        variants: [1],
         page,
         page_size: 20,
       });

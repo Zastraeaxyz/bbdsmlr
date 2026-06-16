@@ -115,13 +115,12 @@ export function listBlogsRecentActivity(blogIds: number[], pageSize = 20) {
 }
 
 export const PostType = {
-  General: 0,
   Text: 1,
   Image: 2,
   Video: 3,
   Audio: 4,
   Link: 5,
-  Poll: 6,
+  Chat: 6,
   Quote: 7,
 } as const
 
@@ -202,6 +201,8 @@ export interface SearchPostsByTagRequest {
   tag_name: string
   sort_field?: number
   order?: number
+  post_types?: number[]
+  variants?: number[]
   page?: number
   page_size?: number
 }
