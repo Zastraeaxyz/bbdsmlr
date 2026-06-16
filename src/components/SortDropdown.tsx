@@ -89,11 +89,11 @@ export default function SortDropdown(props: SortDropdownProps) {
     return ALL_OPTIONS.filter((o) => {
       if (o.value === "1-2") return map.newest;
       if (o.value === "1-1") return map.oldest;
-      if (o.value === "6-1") return map.mostPopular;
-      if (o.value === "6-2") return map.leastPopular;
-      if (o.value === "2-1") return map.mostLiked;
-      if (o.value === "3-1") return map.mostCommented;
-      if (o.value === "4-1") return map.mostReblogged;
+      if (o.value === "6-2") return map.mostPopular;
+      if (o.value === "6-1") return map.leastPopular;
+      if (o.value === "2-2") return map.mostLiked;
+      if (o.value === "3-2") return map.mostCommented;
+      if (o.value === "4-2") return map.mostReblogged;
       return false;
     });
   };
