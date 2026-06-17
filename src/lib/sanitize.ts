@@ -7,20 +7,42 @@ export function getMediaType(url: string): MediaType {
   return "image";
 }
 
+const VALID_SIZES = new Set(["feed", "lightbox", "masonry", "raw", "gallery-grid"]);
+const RAWS = new Set(["gif", "mp4", "webm", "ogg", "mov", "avi"]);
+
+function extname(url: string): string | undefined {
+  return url.split("?")[0].split(".").pop()?.toLowerCase();
+}
+
+function isRaw(ext: string | undefined): ext is string {
+  return ext ? RAWS.has(ext) : false;
+}
+
+function ensureValid(size: string): string {
+  return VALID_SIZES.has(size) ? size : "feed";
+}
+
+const CDN_RE = /^https:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/;
+const MEDIA_RE = /^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/;
+
 export function transformMediaUrl(url: string, size: string = "feed"): string {
-  const m = url.match(/^https:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/);
+  size = ensureValid(size);
+
+  const m = url.match(CDN_RE);
   if (m) {
-    const ext = m[3].split("?")[0].split(".").pop()?.toLowerCase();
-    const actualSize = ext && ["gif", "mp4", "webm", "ogg", "mov", "avi"].includes(ext) ? "raw" : size;
-    return `https://media.bdsmlr.com/${actualSize}/s3://ocdn${m[2]}.bdsmlr.com/${m[3]}`;
+    const ext = extname(m[3]);
+    const s = isRaw(ext) ? "raw" : size;
+    return `https://media.bdsmlr.com/${s}/s3://ocdn${m[2]}.bdsmlr.com/${m[3]}`;
   }
-  const m2 = url.match(/^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/);
+
+  const m2 = url.match(MEDIA_RE);
   if (m2) {
-    const ext = m2[4].split("?")[0].split(".").pop()?.toLowerCase();
-    if (ext && ["gif", "mp4", "webm", "ogg", "mov", "avi"].includes(ext)) {
+    const ext = extname(m2[4]);
+    if (isRaw(ext)) {
       return `https://media.bdsmlr.com/raw/s3://ocdn${m2[3]}.bdsmlr.com/${m2[4]}`;
     }
   }
+
   return url;
 }
 

@@ -434,15 +434,19 @@ function PostCard(props: {
   };
 
   const mediaItems = (): { url: string; type: MediaType }[] => {
-    const c = post.content;
-    if (!c) return [];
-    const urls =
-      c.files && c.files.length > 0
-        ? c.files.map(transformMediaUrl)
-        : c.thumbnail
-          ? [transformMediaUrl(c.thumbnail)]
-          : [];
-    return urls.map((url) => ({ url, type: getMediaType(url) }));
+    const media = post.content;
+    if (!media) return [];
+
+    const sourceUrls: string[] = media.files && media.files.length > 0
+      ? media.files
+      : media.thumbnail
+        ? [media.thumbnail]
+        : [];
+
+    return sourceUrls.map((url) => ({
+      url: transformMediaUrl(url),
+      type: getMediaType(url),
+    }));
   };
 
   const imageUrls = () =>
