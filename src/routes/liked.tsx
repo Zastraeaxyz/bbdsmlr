@@ -72,7 +72,6 @@ export default function LikedPosts() {
       setPosts(incoming);
       nextPageToken = data.page?.nextPageToken ?? null;
       if (!nextPageToken) setHasMore(false);
-      syncUrl();
     } catch (err: unknown) {
       setError((err as Error)?.message || "Failed to load liked posts");
     } finally {

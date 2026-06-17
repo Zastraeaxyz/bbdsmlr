@@ -87,7 +87,6 @@ export default function Home() {
         setPosts(incoming);
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
-        syncUrl();
       } else {
         const graph = await blogFollowGraph(user()!.blog_id!);
         followedBlogIds = graph.following?.map((f) => Number(f.blogId)) ?? [];
@@ -100,7 +99,6 @@ export default function Home() {
         setPosts(incoming);
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
-        syncUrl();
       }
     } catch (err: unknown) {
       setError((err as Error)?.message || "Failed to load feed");
