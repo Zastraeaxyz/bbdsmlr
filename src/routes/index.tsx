@@ -1,5 +1,5 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
-import { A, useNavigate } from "@solidjs/router";
+import { A, useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
   blogFollowGraph,
@@ -33,6 +33,7 @@ import { formatRelativeDate } from "~/lib/date";
 export default function Home() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   createEffect(() => {
     if (!authLoading() && !user()) {
@@ -50,8 +51,12 @@ export default function Home() {
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
   const [sortField, setSortField] = createSignal(SortField.Date);
   const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
-  let nextPageToken: string | null = null;
+  let nextPageToken: string | null = searchParams.page_token || null;
   let followedBlogIds: number[] = [];
+
+  const syncUrl = () => {
+    setSearchParams({ page_token: nextPageToken || undefined }, { replace: true });
+  };
 
   const fetchFeed = async () => {
     if (!user()?.blog_id) {
@@ -64,7 +69,6 @@ export default function Home() {
     setError("");
     setPosts([]);
     setHasMore(true);
-    nextPageToken = null;
 
     try {
       const q = activeQuery();
@@ -75,12 +79,15 @@ export default function Home() {
           order: sortOrder(),
           post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
           variants: [1],
-          page: { page_size: 20 },
+          page: nextPageToken
+            ? { page_size: 20, page_token: nextPageToken }
+            : { page_size: 20 },
         });
         const incoming = data.posts ?? [];
         setPosts(incoming);
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
+        syncUrl();
       } else {
         const graph = await blogFollowGraph(user()!.blog_id!);
         followedBlogIds = graph.following?.map((f) => Number(f.blogId)) ?? [];
@@ -93,6 +100,7 @@ export default function Home() {
         setPosts(incoming);
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
+        syncUrl();
       }
     } catch (err: unknown) {
       setError((err as Error)?.message || "Failed to load feed");
@@ -126,6 +134,7 @@ export default function Home() {
         setPosts((prev) => [...prev, ...incoming]);
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
+        syncUrl();
       } else {
         if (followedBlogIds.length === 0) return;
         const data = await listBlogsRecentActivity(followedBlogIds, 20, token);
@@ -133,9 +142,11 @@ export default function Home() {
         setPosts((prev) => [...prev, ...incoming]);
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
+        syncUrl();
       }
     } catch {
       nextPageToken = token;
+      syncUrl();
     } finally {
       setLoadingMore(false);
     }
@@ -144,12 +155,14 @@ export default function Home() {
   const doSearch = (e: Event) => {
     e.preventDefault();
     setActiveQuery(query());
+    nextPageToken = null;
     fetchFeed();
   };
 
   const clearSearch = () => {
     setQuery("");
     setActiveQuery("");
+    nextPageToken = null;
     fetchFeed();
   };
 
@@ -157,6 +170,7 @@ export default function Home() {
     const q = (query() ? query() + " " : "") + `tag:${tag}`;
     setQuery(q);
     setActiveQuery(q);
+    nextPageToken = null;
     fetchFeed();
   };
 
@@ -172,6 +186,7 @@ export default function Home() {
               onChange={(sf, so) => {
                 setSortField(sf);
                 setSortOrder(so);
+                nextPageToken = null;
                 fetchFeed();
               }}
               options={{
@@ -206,6 +221,7 @@ export default function Home() {
               onFill={(q) => {
                 setQuery(q);
                 setActiveQuery(q);
+                nextPageToken = null;
                 fetchFeed();
               }}
             />

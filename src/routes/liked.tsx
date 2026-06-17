@@ -1,5 +1,5 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
-import { A } from "@solidjs/router";
+import { A, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
   listBlogActivity,
@@ -29,6 +29,7 @@ import { formatRelativeDate } from "~/lib/date";
 
 export default function LikedPosts() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [posts, setPosts] = createSignal<Post[]>([]);
   const [loading, setLoading] = createSignal(true);
@@ -38,7 +39,11 @@ export default function LikedPosts() {
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
   const [sortField, setSortField] = createSignal(SortField.Date);
   const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
-  let nextPageToken: string | null = null;
+  let nextPageToken: string | null = searchParams.page_token || null;
+
+  const syncUrl = () => {
+    setSearchParams({ page_token: nextPageToken || undefined }, { replace: true });
+  };
 
   const fetchLiked = async () => {
     const u = user();
@@ -52,7 +57,6 @@ export default function LikedPosts() {
     setError("");
     setPosts([]);
     setHasMore(true);
-    nextPageToken = null;
     try {
       const data = await listBlogActivity({
         blog_id: u.blog_id,
@@ -60,12 +64,15 @@ export default function LikedPosts() {
         order: sortOrder(),
         post_types: [1, 2, 3, 4, 5, 6, 7],
         activity_kinds: ["like"],
-        page: { page_size: 20 },
+        page: nextPageToken
+          ? { page_size: 20, page_token: nextPageToken }
+          : { page_size: 20 },
       });
       const incoming = data.posts ?? [];
       setPosts(incoming);
       nextPageToken = data.page?.nextPageToken ?? null;
       if (!nextPageToken) setHasMore(false);
+      syncUrl();
     } catch (err: unknown) {
       setError((err as Error)?.message || "Failed to load liked posts");
     } finally {
@@ -96,8 +103,10 @@ export default function LikedPosts() {
       setPosts((prev) => [...prev, ...incoming]);
       nextPageToken = data.page?.nextPageToken ?? null;
       if (!nextPageToken) setHasMore(false);
+      syncUrl();
     } catch {
       nextPageToken = token;
+      syncUrl();
     } finally {
       setLoadingMore(false);
     }
