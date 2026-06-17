@@ -8,14 +8,8 @@ export function getMediaType(url: string): MediaType {
 }
 
 export function transformMediaUrl(url: string): string {
-  const qidx = url.indexOf("?");
-  const baseUrl = qidx !== -1 ? url.slice(0, qidx) : url;
-  const query = qidx !== -1 ? url.slice(qidx) : "";
-  const m = baseUrl.match(
-    /^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/ocdn(\d+)\.bdsmlr\.com\/(.+)/,
-  );
-  if (m) return `https://cdn${m[2]}.bdsmlr.com/${m[3]}${query}`;
-  url.replace("ocdn", "cdn"); // if ocdn is used, lets use cdn instead
+  const m = url.match(/^https:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/);
+  if (m) return `https://media.bdsmlr.com/feed/s3://ocdn${m[2]}.bdsmlr.com/${m[3]}`;
   return url;
 }
 

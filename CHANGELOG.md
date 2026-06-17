@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Media URL routing** — Image and video URLs now route through the `media.bdsmlr.com/feed/s3://` proxy instead of directly hitting CDN hosts, fixing broken media on some posts.
+
 ### Added
 
 - **Hide reblogs toggle on profile** — A gear icon next to the search bar now opens a settings dropdown with a "Hide reblogs" checkbox. When checked, only original posts from the creator are shown; reblogged content is hidden.
