@@ -14,6 +14,13 @@ export function transformMediaUrl(url: string, size: string = "feed"): string {
     const actualSize = ext && ["gif", "mp4", "webm", "ogg", "mov", "avi"].includes(ext) ? "raw" : size;
     return `https://media.bdsmlr.com/${actualSize}/s3://ocdn${m[2]}.bdsmlr.com/${m[3]}`;
   }
+  const m2 = url.match(/^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/);
+  if (m2) {
+    const ext = m2[4].split("?")[0].split(".").pop()?.toLowerCase();
+    if (ext && ["gif", "mp4", "webm", "ogg", "mov", "avi"].includes(ext)) {
+      return `https://media.bdsmlr.com/raw/s3://ocdn${m2[3]}.bdsmlr.com/${m2[4]}`;
+    }
+  }
   return url;
 }
 
