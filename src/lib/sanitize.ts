@@ -7,10 +7,18 @@ export function getMediaType(url: string): MediaType {
   return "image";
 }
 
-export function transformMediaUrl(url: string): string {
+export function transformMediaUrl(url: string, size: string = "feed"): string {
   const m = url.match(/^https:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/);
-  if (m) return `https://media.bdsmlr.com/feed/s3://ocdn${m[2]}.bdsmlr.com/${m[3]}`;
+  if (m) {
+    const ext = m[3].split("?")[0].split(".").pop()?.toLowerCase();
+    const actualSize = ext && ["gif", "mp4", "webm", "ogg", "mov", "avi"].includes(ext) ? "raw" : size;
+    return `https://media.bdsmlr.com/${actualSize}/s3://ocdn${m[2]}.bdsmlr.com/${m[3]}`;
+  }
   return url;
+}
+
+export function upgradeToLightbox(url: string): string {
+  return url.replace(/https:\/\/media\.bdsmlr\.com\/(feed|masonry)\//, "https://media.bdsmlr.com/lightbox/");
 }
 
 export function sanitizeHtml(html: string): string {
@@ -23,12 +31,12 @@ export function sanitizeHtml(html: string): string {
   return cleaned;
 }
 
-export function processContentHtml(html: string, files?: string[]): string {
+export function processContentHtml(html: string, files?: string[], size: string = "feed"): string {
   if (!files || files.length === 0) return html;
 
   const fileMap = new Map<string, string>();
   for (const url of files) {
-    const transformed = transformMediaUrl(url);
+    const transformed = transformMediaUrl(url, size);
     const filename = transformed.split("/").pop()?.split("?")[0];
     if (filename) fileMap.set(filename, transformed);
   }

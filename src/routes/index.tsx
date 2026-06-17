@@ -18,6 +18,7 @@ import {
   processContentHtml,
   transformMediaUrl,
   getMediaType,
+  upgradeToLightbox,
   type MediaType,
 } from "~/lib/sanitize";
 import Header from "~/components/Header";
@@ -225,7 +226,7 @@ export default function Home() {
                     <PostCard
                       post={post}
                       onTagClick={handleTagClick}
-                      onImageClick={setLightboxUrl}
+                       onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))}
                     />
                   )}
                 </For>

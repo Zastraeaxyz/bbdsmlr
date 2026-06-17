@@ -18,6 +18,7 @@ import {
   processContentHtml,
   transformMediaUrl,
   getMediaType,
+  upgradeToLightbox,
   type MediaType,
 } from "~/lib/sanitize";
 import SearchHelp from "~/components/SearchHelp";
@@ -368,26 +369,26 @@ export default function UserFeed() {
                   <PostCard
                     post={post}
                     onTagClick={handleTagClick}
-                    onImageClick={setLightboxUrl}
-                  />
-                )}
-              </For>
-            </div>
+                    onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
           </Show>
-        </Show>
 
-        {hasMore() && !loading() && (
-          <button
-            onClick={loadMore}
-            disabled={loadingMore()}
-            class="btn-ghost"
-            style="display:block;margin:24px auto"
-          >
-            {loadingMore() ? "Loading…" : "Load more"}
-          </button>
-        )}
-      </main>
-      <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
+          {hasMore() && !loading() && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore()}
+              class="btn-ghost"
+              style="display:block;margin:24px auto"
+            >
+              {loadingMore() ? "Loading…" : "Load more"}
+            </button>
+          )}
+        </main>
+        <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </>
   );
 }

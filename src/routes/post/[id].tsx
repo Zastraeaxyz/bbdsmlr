@@ -13,6 +13,7 @@ import {
   processContentHtml,
   transformMediaUrl,
   getMediaType,
+  upgradeToLightbox,
   type MediaType,
 } from "~/lib/sanitize";
 import Header from "~/components/Header";
@@ -76,7 +77,7 @@ export default function PostPage() {
         {error() && <p class="error">{error()}</p>}
         {loading() && <p class="loading">Loading post…</p>}
         <Show when={!loading() && post()}>
-          <PostDetail post={post()!} onImageClick={setLightboxUrl} />
+          <PostDetail post={post()!} onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))} />
         </Show>
       </main>
       <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
@@ -127,9 +128,9 @@ function PostDetail(props: {
     if (!c) return [];
     const urls =
       c.files && c.files.length > 0
-        ? c.files.map(transformMediaUrl)
+        ? c.files.map((u) => transformMediaUrl(u, "lightbox"))
         : c.thumbnail
-          ? [transformMediaUrl(c.thumbnail)]
+          ? [transformMediaUrl(c.thumbnail, "lightbox")]
           : [];
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
@@ -141,7 +142,7 @@ function PostDetail(props: {
     if (!c?.html) return null;
     const processed =
       props.post.type === PostType.Text
-        ? processContentHtml(c.html, c.files)
+        ? processContentHtml(c.html, c.files, "lightbox")
         : c.html;
     return sanitizeHtml(processed);
   };

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Media URL routing** — Image and video URLs now route through the `media.bdsmlr.com/feed/s3://` proxy instead of directly hitting CDN hosts, fixing broken media on some posts.
+- **Media URL routing** — Image and video URLs now route through the `media.bdsmlr.com` proxy instead of directly hitting CDN hosts. Feed pages use `/feed/` size, post detail and LightBox use `/lightbox/` for highest resolution, and GIFs/videos use `/raw/`.
 
 ### Added
 

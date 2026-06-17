@@ -16,6 +16,7 @@ import {
   processContentHtml,
   transformMediaUrl,
   getMediaType,
+  upgradeToLightbox,
   type MediaType,
 } from "~/lib/sanitize";
 import Header from "~/components/Header";
@@ -133,7 +134,7 @@ export default function LikedPosts() {
             <div class="feed">
               <For each={posts()}>
                 {(post) => (
-                  <PostCard post={post} onImageClick={setLightboxUrl} />
+                  <PostCard post={post} onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))} />
                 )}
               </For>
             </div>
