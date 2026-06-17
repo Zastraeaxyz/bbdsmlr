@@ -106,11 +106,11 @@ export function resolveIdentifier(blogName: string) {
   return request<ResolveIdentifierResponse>(API_BASE, '/resolve-identifier', { blog_name: blogName })
 }
 
-export function listBlogsRecentActivity(blogIds: number[], pageSize = 20) {
+export function listBlogsRecentActivity(blogIds: number[], pageSize = 20, pageToken?: string) {
   return request<ListBlogsRecentActivityResponse>(API_BASE, '/list-blogs-recent-activity', {
     blog_ids: blogIds,
     global_merge: true,
-    page: { page_size: pageSize },
+    page: { page_size: pageSize, ...(pageToken ? { page_token: pageToken } : {}) },
   })
 }
 
@@ -203,7 +203,7 @@ export interface SearchPostsByTagRequest {
   order?: number
   post_types?: number[]
   variants?: number[]
-  page?: number
+  page?: number | { page_size?: number; page_token?: string }
   page_size?: number
 }
 

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Cursor-based pagination on home feed** — The home page now uses page tokens (`nextPageToken`) for both tag search and following feed, matching the liked page behavior. Load more is no longer limited to the initial search page; the following feed also supports incremental loading.
 - **Media URL routing** — Image and video URLs now route through the `media.bdsmlr.com` proxy instead of directly hitting CDN hosts. Feed pages use `/feed/` size, post detail and LightBox use `/lightbox/` for highest resolution, and GIFs/videos use `/raw/`.
 
 ### Added

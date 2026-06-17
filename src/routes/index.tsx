@@ -50,36 +50,8 @@ export default function Home() {
   const [lightboxUrl, setLightboxUrl] = createSignal<string | null>(null);
   const [sortField, setSortField] = createSignal(SortField.Date);
   const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
-  let page = 1;
-
-  const loadPage = async () => {
-    const q = activeQuery();
-    if (q) {
-      const data = await searchPostsByTag({
-        tag_name: q,
-        sort_field: sortField(),
-        order: sortOrder(),
-        post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
-        variants: [1],
-        page,
-        page_size: 20,
-      });
-      const incoming = data.posts ?? [];
-      setPosts((prev) => [...prev, ...incoming]);
-      if (incoming.length < 20) setHasMore(false);
-    } else {
-      if (!user()?.blog_id) return;
-      const graph = await blogFollowGraph(user()!.blog_id!);
-      const following = graph.following || [];
-      if (following.length === 0) {
-        setPosts([]);
-        return;
-      }
-      const blogIds = following.map((f) => Number(f.blogId));
-      const data = await listBlogsRecentActivity(blogIds, 20);
-      setPosts(data.posts ?? []);
-    }
-  };
+  let nextPageToken: string | null = null;
+  let followedBlogIds: number[] = [];
 
   const fetchFeed = async () => {
     if (!user()?.blog_id) {
@@ -92,9 +64,36 @@ export default function Home() {
     setError("");
     setPosts([]);
     setHasMore(true);
-    page = 1;
+    nextPageToken = null;
+
     try {
-      await loadPage();
+      const q = activeQuery();
+      if (q) {
+        const data = await searchPostsByTag({
+          tag_name: q,
+          sort_field: sortField(),
+          order: sortOrder(),
+          post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
+          variants: [1],
+          page: { page_size: 20 },
+        });
+        const incoming = data.posts ?? [];
+        setPosts(incoming);
+        nextPageToken = data.page?.nextPageToken ?? null;
+        if (!nextPageToken) setHasMore(false);
+      } else {
+        const graph = await blogFollowGraph(user()!.blog_id!);
+        followedBlogIds = graph.following?.map((f) => Number(f.blogId)) ?? [];
+        if (followedBlogIds.length === 0) {
+          setPosts([]);
+          return;
+        }
+        const data = await listBlogsRecentActivity(followedBlogIds, 20);
+        const incoming = data.posts ?? [];
+        setPosts(incoming);
+        nextPageToken = data.page?.nextPageToken ?? null;
+        if (!nextPageToken) setHasMore(false);
+      }
     } catch (err: unknown) {
       setError((err as Error)?.message || "Failed to load feed");
     } finally {
@@ -108,13 +107,35 @@ export default function Home() {
   });
 
   const loadMore = async () => {
-    if (!hasMore() || loadingMore()) return;
+    if (!hasMore() || loadingMore() || !nextPageToken) return;
     setLoadingMore(true);
-    page++;
+    const token = nextPageToken;
+    nextPageToken = null;
     try {
-      await loadPage();
+      const q = activeQuery();
+      if (q) {
+        const data = await searchPostsByTag({
+          tag_name: q,
+          sort_field: sortField(),
+          order: sortOrder(),
+          post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
+          variants: [1],
+          page: { page_size: 20, page_token: token },
+        });
+        const incoming = data.posts ?? [];
+        setPosts((prev) => [...prev, ...incoming]);
+        nextPageToken = data.page?.nextPageToken ?? null;
+        if (!nextPageToken) setHasMore(false);
+      } else {
+        if (followedBlogIds.length === 0) return;
+        const data = await listBlogsRecentActivity(followedBlogIds, 20, token);
+        const incoming = data.posts ?? [];
+        setPosts((prev) => [...prev, ...incoming]);
+        nextPageToken = data.page?.nextPageToken ?? null;
+        if (!nextPageToken) setHasMore(false);
+      }
     } catch {
-      page--;
+      nextPageToken = token;
     } finally {
       setLoadingMore(false);
     }
@@ -123,18 +144,12 @@ export default function Home() {
   const doSearch = (e: Event) => {
     e.preventDefault();
     setActiveQuery(query());
-    page = 1;
-    setPosts([]);
-    setHasMore(true);
-    loadPage();
+    fetchFeed();
   };
 
   const clearSearch = () => {
     setQuery("");
     setActiveQuery("");
-    page = 1;
-    setPosts([]);
-    setHasMore(true);
     fetchFeed();
   };
 
@@ -142,10 +157,7 @@ export default function Home() {
     const q = (query() ? query() + " " : "") + `tag:${tag}`;
     setQuery(q);
     setActiveQuery(q);
-    page = 1;
-    setPosts([]);
-    setHasMore(true);
-    loadPage();
+    fetchFeed();
   };
 
   return (
@@ -160,10 +172,7 @@ export default function Home() {
               onChange={(sf, so) => {
                 setSortField(sf);
                 setSortOrder(so);
-                page = 1;
-                setPosts([]);
-                setHasMore(true);
-                loadPage();
+                fetchFeed();
               }}
               options={{
                 newest: true,
@@ -197,10 +206,7 @@ export default function Home() {
               onFill={(q) => {
                 setQuery(q);
                 setActiveQuery(q);
-                page = 1;
-                setPosts([]);
-                setHasMore(true);
-                loadPage();
+                fetchFeed();
               }}
             />
           </form>
