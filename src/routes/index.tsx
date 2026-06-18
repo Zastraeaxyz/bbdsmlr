@@ -2,7 +2,6 @@ import { createSignal, createEffect, For, Show } from "solid-js";
 import { A, useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
-  blogFollowGraph,
   listBlogsRecentActivity,
   searchPostsByTag,
   PostType,
@@ -11,6 +10,7 @@ import {
   SortOrder,
   type Post,
 } from "~/lib/api";
+import { getCachedFollowingIds } from "~/lib/following";
 import { useAuth } from "~/lib/useAuth";
 import SortDropdown from "~/components/SortDropdown";
 import {
@@ -88,8 +88,7 @@ export default function Home() {
         nextPageToken = data.page?.nextPageToken ?? null;
         if (!nextPageToken) setHasMore(false);
       } else {
-        const graph = await blogFollowGraph(user()!.blog_id!);
-        followedBlogIds = graph.following?.map((f) => Number(f.blogId)) ?? [];
+        followedBlogIds = getCachedFollowingIds();
         if (followedBlogIds.length === 0) {
           setPosts([]);
           return;

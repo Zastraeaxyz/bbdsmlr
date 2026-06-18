@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Following graph cached in localStorage** — When you log in, all blog IDs you follow are fetched (all pages) and cached locally. The home feed now uses this cache instead of re-fetching the graph, and the cache refreshes when you visit your own following page.
+
 ### Fixed
 
 - **Cursor-based pagination on home feed** — The home page now uses page tokens (`nextPageToken`) for both tag search and following feed, matching the liked page behavior. Load more is no longer limited to the initial search page; the following feed also supports incremental loading.

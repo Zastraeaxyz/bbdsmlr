@@ -2,10 +2,13 @@ import { createSignal, createEffect, For, Show } from 'solid-js'
 import { useParams, A } from '@solidjs/router'
 import { Title } from '@solidjs/meta'
 import { resolveIdentifier, blogFollowGraph, type FollowEdge } from '~/lib/api'
+import { useAuth } from '~/lib/useAuth'
+import { setCachedFollowingIds } from '~/lib/following'
 
 export default function FollowingPage() {
   const params = useParams()
   const slug = () => params.user
+  const { user } = useAuth()
 
   const [following, setFollowing] = createSignal<FollowEdge[]>([])
   const [loading, setLoading] = createSignal(true)
@@ -34,6 +37,9 @@ export default function FollowingPage() {
         all.push(...(graph.following || []))
         pageToken = graph.nextPageToken
         if (!pageToken) break
+      }
+      if (user()?.blog_id === resolved.blogId) {
+        setCachedFollowingIds(all.map((f) => Number(f.blogId)))
       }
       setFollowing(all)
     } catch (err: unknown) {
