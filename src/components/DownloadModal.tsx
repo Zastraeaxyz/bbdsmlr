@@ -63,7 +63,7 @@ export function DownloadModal(props: DownloadModalProps) {
           <For each={props.urls}>
             {(url) => (
               <div class="download-modal-preview-item">
-                <img src={url} alt="" loading="lazy" />
+                <img src={url} alt="" />
               </div>
             )}
           </For>

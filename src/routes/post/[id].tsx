@@ -1,12 +1,7 @@
 import { createSignal, createEffect, For, Show } from "solid-js";
 import { useParams, A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
-import {
-  getPostDetail,
-  PostType,
-  PostVariant,
-  type Post,
-} from "~/lib/api";
+import { getPostDetail, PostType, PostVariant, type Post } from "~/lib/api";
 import { useAuth } from "~/lib/useAuth";
 import {
   sanitizeHtml,
@@ -19,7 +14,13 @@ import {
 import Header from "~/components/Header";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
-import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon, BdsmlrIcon } from "~/components/Icons";
+import {
+  HeartIcon,
+  ChatIcon,
+  ReblogIcon,
+  DownloadIcon,
+  BdsmlrIcon,
+} from "~/components/Icons";
 import { DownloadModal } from "~/components/DownloadModal";
 import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
@@ -77,7 +78,10 @@ export default function PostPage() {
         {error() && <p class="error">{error()}</p>}
         {loading() && <p class="loading">Loading post…</p>}
         <Show when={!loading() && post()}>
-          <PostDetail post={post()!} onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))} />
+          <PostDetail
+            post={post()!}
+            onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))}
+          />
         </Show>
       </main>
       <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
@@ -94,7 +98,11 @@ function PostDetail(props: {
   const handleDownloadClick = () => {
     const urls = imageUrls();
     if (urls.length === 1) {
-      downloadImages({ urls, blogName: props.post.blogName, postId: props.post.id });
+      downloadImages({
+        urls,
+        blogName: props.post.blogName,
+        postId: props.post.id,
+      });
     } else {
       setShowDownloadModal(true);
     }
@@ -135,7 +143,10 @@ function PostDetail(props: {
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
-  const imageUrls = () => mediaItems().filter((i) => i.type === "image").map((i) => i.url);
+  const imageUrls = () =>
+    mediaItems()
+      .filter((i) => i.type === "image")
+      .map((i) => i.url);
 
   const contentHtml = () => {
     const c = props.post.content;
@@ -208,7 +219,6 @@ function PostDetail(props: {
                 <img
                   src={item.url}
                   alt=""
-                  loading="lazy"
                   onClick={() => props.onImageClick?.(item.url)}
                 />
               </Show>

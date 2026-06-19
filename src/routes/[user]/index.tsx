@@ -1,4 +1,11 @@
-import { createSignal, createEffect, For, Show, onCleanup, onMount } from "solid-js";
+import {
+  createSignal,
+  createEffect,
+  For,
+  Show,
+  onCleanup,
+  onMount,
+} from "solid-js";
 import { useParams, A } from "@solidjs/router";
 import {
   resolveIdentifier,
@@ -112,9 +119,7 @@ export default function UserFeed() {
     }
     let incoming = data.posts ?? [];
     if (hideReblogs()) {
-      incoming = incoming.filter(
-        (p) => p.variant !== PostVariant.Reblog
-      );
+      incoming = incoming.filter((p) => p.variant !== PostVariant.Reblog);
     }
     setPosts((prev) => [...prev, ...incoming]);
     if (incoming.length < PAGE_SIZE) setHasMore(false);
@@ -208,7 +213,6 @@ export default function UserFeed() {
 
   return (
     <>
-
       {topTags().length > 0 && (
         <section class="top-tags">
           <div class="top-tags-inner">
@@ -369,26 +373,28 @@ export default function UserFeed() {
                   <PostCard
                     post={post}
                     onTagClick={handleTagClick}
-                    onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))}
-                    />
-                  )}
-                </For>
-              </div>
-            </Show>
+                    onImageClick={(url) =>
+                      setLightboxUrl(upgradeToLightbox(url))
+                    }
+                  />
+                )}
+              </For>
+            </div>
           </Show>
+        </Show>
 
-          {hasMore() && !loading() && (
-            <button
-              onClick={loadMore}
-              disabled={loadingMore()}
-              class="btn-ghost"
-              style="display:block;margin:24px auto"
-            >
-              {loadingMore() ? "Loading…" : "Load more"}
-            </button>
-          )}
-        </main>
-        <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
+        {hasMore() && !loading() && (
+          <button
+            onClick={loadMore}
+            disabled={loadingMore()}
+            class="btn-ghost"
+            style="display:block;margin:24px auto"
+          >
+            {loadingMore() ? "Loading…" : "Load more"}
+          </button>
+        )}
+      </main>
+      <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </>
   );
 }
@@ -437,11 +443,12 @@ function PostCard(props: {
     const media = post.content;
     if (!media) return [];
 
-    const sourceUrls: string[] = media.files && media.files.length > 0
-      ? media.files
-      : media.thumbnail
-        ? [media.thumbnail]
-        : [];
+    const sourceUrls: string[] =
+      media.files && media.files.length > 0
+        ? media.files
+        : media.thumbnail
+          ? [media.thumbnail]
+          : [];
 
     return sourceUrls.map((url) => ({
       url: transformMediaUrl(url),
@@ -520,7 +527,6 @@ function PostCard(props: {
                 <img
                   src={item.url}
                   alt=""
-                  loading="lazy"
                   onClick={() => props.onImageClick?.(item.url)}
                 />
               </Show>

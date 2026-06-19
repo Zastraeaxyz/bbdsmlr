@@ -25,7 +25,13 @@ import Header from "~/components/Header";
 import SearchHelp from "~/components/SearchHelp";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
-import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon, BdsmlrIcon } from "~/components/Icons";
+import {
+  HeartIcon,
+  ChatIcon,
+  ReblogIcon,
+  DownloadIcon,
+  BdsmlrIcon,
+} from "~/components/Icons";
 import { DownloadModal } from "~/components/DownloadModal";
 import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
@@ -55,7 +61,10 @@ export default function Home() {
   let followedBlogIds: number[] = [];
 
   const syncUrl = () => {
-    setSearchParams({ page_token: nextPageToken || undefined }, { replace: true });
+    setSearchParams(
+      { page_token: nextPageToken || undefined },
+      { replace: true },
+    );
   };
 
   const fetchFeed = async () => {
@@ -77,7 +86,15 @@ export default function Home() {
           tag_name: q,
           sort_field: sortField(),
           order: sortOrder(),
-          post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
+          post_types: [
+            PostType.Text,
+            PostType.Image,
+            PostType.Video,
+            PostType.Audio,
+            PostType.Link,
+            PostType.Chat,
+            PostType.Quote,
+          ],
           variants: [1],
           page: nextPageToken
             ? { page_size: 20, page_token: nextPageToken }
@@ -123,7 +140,15 @@ export default function Home() {
           tag_name: q,
           sort_field: sortField(),
           order: sortOrder(),
-          post_types: [PostType.Text, PostType.Image, PostType.Video, PostType.Audio, PostType.Link, PostType.Chat, PostType.Quote],
+          post_types: [
+            PostType.Text,
+            PostType.Image,
+            PostType.Video,
+            PostType.Audio,
+            PostType.Link,
+            PostType.Chat,
+            PostType.Quote,
+          ],
           variants: [1],
           page: { page_size: 20, page_token: token },
         });
@@ -245,7 +270,9 @@ export default function Home() {
                     <PostCard
                       post={post}
                       onTagClick={handleTagClick}
-                       onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))}
+                      onImageClick={(url) =>
+                        setLightboxUrl(upgradeToLightbox(url))
+                      }
                     />
                   )}
                 </For>
@@ -322,7 +349,10 @@ function PostCard(props: {
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
-  const imageUrls = () => mediaItems().filter((i) => i.type === "image").map((i) => i.url);
+  const imageUrls = () =>
+    mediaItems()
+      .filter((i) => i.type === "image")
+      .map((i) => i.url);
 
   const contentHtml = () => {
     const c = post.content;
@@ -390,7 +420,6 @@ function PostCard(props: {
                 <img
                   src={item.url}
                   alt=""
-                  loading="lazy"
                   onClick={() => props.onImageClick?.(item.url)}
                 />
               </Show>

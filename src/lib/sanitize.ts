@@ -7,7 +7,13 @@ export function getMediaType(url: string): MediaType {
   return "image";
 }
 
-const VALID_SIZES = new Set(["feed", "lightbox", "masonry", "raw", "gallery-grid"]);
+const VALID_SIZES = new Set([
+  "feed",
+  "lightbox",
+  "masonry",
+  "raw",
+  "gallery-grid",
+]);
 const RAWS = new Set(["gif", "mp4", "webm", "ogg", "mov", "avi"]);
 
 function extname(url: string): string | undefined {
@@ -23,7 +29,8 @@ function ensureValid(size: string): string {
 }
 
 const CDN_RE = /^https:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/;
-const MEDIA_RE = /^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/;
+const MEDIA_RE =
+  /^https:\/\/media\.bdsmlr\.com\/([^/]+)\/s3:\/\/(ocdn|cdn)(\d+)\.bdsmlr\.com\/(.+)/;
 
 export function transformMediaUrl(url: string, size: string = "feed"): string {
   size = ensureValid(size);
@@ -47,7 +54,10 @@ export function transformMediaUrl(url: string, size: string = "feed"): string {
 }
 
 export function upgradeToLightbox(url: string): string {
-  return url.replace(/https:\/\/media\.bdsmlr\.com\/(feed|masonry)\//, "https://media.bdsmlr.com/lightbox/");
+  return url.replace(
+    /https:\/\/media\.bdsmlr\.com\/(feed|masonry)\//,
+    "https://media.bdsmlr.com/lightbox/",
+  );
 }
 
 export function sanitizeHtml(html: string): string {
@@ -60,7 +70,11 @@ export function sanitizeHtml(html: string): string {
   return cleaned;
 }
 
-export function processContentHtml(html: string, files?: string[], size: string = "feed"): string {
+export function processContentHtml(
+  html: string,
+  files?: string[],
+  size: string = "feed",
+): string {
   if (!files || files.length === 0) return html;
 
   const fileMap = new Map<string, string>();
@@ -80,7 +94,7 @@ export function processContentHtml(html: string, files?: string[], size: string 
       if (type === "video") {
         return `<video src="${url}" muted controls preload="metadata"></video>`;
       }
-      return `<img src="${url}" alt="" loading="lazy" />`;
+      return `<img src="${url}" alt="" />`;
     },
   );
 }

@@ -22,7 +22,13 @@ import {
 import Header from "~/components/Header";
 import { ReblogAttribution } from "~/components/ReblogAttribution";
 import { LightBox } from "~/components/LightBox";
-import { HeartIcon, ChatIcon, ReblogIcon, DownloadIcon, BdsmlrIcon } from "~/components/Icons";
+import {
+  HeartIcon,
+  ChatIcon,
+  ReblogIcon,
+  DownloadIcon,
+  BdsmlrIcon,
+} from "~/components/Icons";
 import { DownloadModal } from "~/components/DownloadModal";
 import { downloadImages } from "~/lib/download";
 import { formatRelativeDate } from "~/lib/date";
@@ -42,7 +48,10 @@ export default function LikedPosts() {
   let nextPageToken: string | null = searchParams.page_token || null;
 
   const syncUrl = () => {
-    setSearchParams({ page_token: nextPageToken || undefined }, { replace: true });
+    setSearchParams(
+      { page_token: nextPageToken || undefined },
+      { replace: true },
+    );
   };
 
   const fetchLiked = async () => {
@@ -142,7 +151,12 @@ export default function LikedPosts() {
             <div class="feed">
               <For each={posts()}>
                 {(post) => (
-                  <PostCard post={post} onImageClick={(url) => setLightboxUrl(upgradeToLightbox(url))} />
+                  <PostCard
+                    post={post}
+                    onImageClick={(url) =>
+                      setLightboxUrl(upgradeToLightbox(url))
+                    }
+                  />
                 )}
               </For>
             </div>
@@ -213,7 +227,10 @@ function PostCard(props: { post: Post; onImageClick?: (url: string) => void }) {
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
-  const imageUrls = () => mediaItems().filter((i) => i.type === "image").map((i) => i.url);
+  const imageUrls = () =>
+    mediaItems()
+      .filter((i) => i.type === "image")
+      .map((i) => i.url);
 
   const contentHtml = () => {
     const c = post.content;
@@ -281,7 +298,6 @@ function PostCard(props: { post: Post; onImageClick?: (url: string) => void }) {
                 <img
                   src={item.url}
                   alt=""
-                  loading="lazy"
                   onClick={() => props.onImageClick?.(item.url)}
                 />
               </Show>
