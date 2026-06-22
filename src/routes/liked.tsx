@@ -1,4 +1,4 @@
-import { createSignal, createEffect, For, Show } from "solid-js";
+import { createSignal, createEffect, For, Show, onMount, onCleanup } from "solid-js";
 import { A, useSearchParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import {
@@ -46,6 +46,7 @@ export default function LikedPosts() {
   const [sortField, setSortField] = createSignal(SortField.Date);
   const [sortOrder, setSortOrder] = createSignal(SortOrder.Descending);
   let nextPageToken: string | null = searchParams.page_token || null;
+  let loadMoreRef: HTMLButtonElement | undefined;
 
   const syncUrl = () => {
     setSearchParams(
@@ -120,6 +121,17 @@ export default function LikedPosts() {
     }
   };
 
+  onMount(() => {
+    if (!loadMoreRef) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    });
+    observer.observe(loadMoreRef);
+    onCleanup(() => observer.disconnect());
+  });
+
   return (
     <div class="home-page">
       <Title>Liked posts — bbdsmlr</Title>
@@ -163,16 +175,15 @@ export default function LikedPosts() {
           </Show>
         </Show>
 
-        {hasMore() && !loading() && (
-          <button
-            onClick={loadMore}
-            disabled={loadingMore()}
-            class="btn-ghost"
-            style="display:block;margin:24px auto"
-          >
-            {loadingMore() ? "Loading…" : "Load more"}
-          </button>
-        )}
+        <button
+          ref={loadMoreRef}
+          onClick={loadMore}
+          disabled={loadingMore()}
+          class="btn-ghost"
+          style="display:block;margin:24px auto"
+        >
+          {loadingMore() ? "Loading more" : "Load more"}
+        </button>
       </main>
       <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </div>

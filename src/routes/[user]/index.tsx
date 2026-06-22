@@ -97,6 +97,7 @@ export default function UserFeed() {
 
   let resolvedId: number | null = null;
   let page = 1;
+  let loadMoreRef: HTMLButtonElement | undefined;
 
   const loadPage = async (name: string) => {
     if (!resolvedId) return;
@@ -174,6 +175,17 @@ export default function UserFeed() {
       setLoadingMore(false);
     }
   };
+
+  onMount(() => {
+    if (!loadMoreRef) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    });
+    observer.observe(loadMoreRef);
+    onCleanup(() => observer.disconnect());
+  });
 
   const doSearch = (e: Event) => {
     e.preventDefault();
@@ -383,16 +395,15 @@ export default function UserFeed() {
           </Show>
         </Show>
 
-        {hasMore() && !loading() && (
-          <button
-            onClick={loadMore}
-            disabled={loadingMore()}
-            class="btn-ghost"
-            style="display:block;margin:24px auto"
-          >
-            {loadingMore() ? "Loading…" : "Load more"}
-          </button>
-        )}
+        <button
+          ref={loadMoreRef}
+          onClick={loadMore}
+          disabled={loadingMore()}
+          class="btn-ghost"
+          style="display:block;margin:24px auto"
+        >
+          {loadingMore() ? "Loading more" : "Load more"}
+        </button>
       </main>
       <LightBox url={lightboxUrl()} onClose={() => setLightboxUrl(null)} />
     </>
