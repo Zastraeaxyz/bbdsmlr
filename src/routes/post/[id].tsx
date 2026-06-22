@@ -6,7 +6,6 @@ import { useAuth } from "~/lib/useAuth";
 import {
   sanitizeHtml,
   processContentHtml,
-  transformMediaUrl,
   getMediaType,
   getPostMediaUrls,
   upgradeToLightbox,
@@ -133,10 +132,7 @@ function PostDetail(props: {
   };
 
   const mediaItems = (): { url: string; type: MediaType }[] => {
-    const urls = getPostMediaUrls(props.post).map((u) =>
-      transformMediaUrl(u, "lightbox"),
-    );
-    return urls.map((url) => ({ url, type: getMediaType(url) }));
+    return getPostMediaUrls(props.post).map((url) => ({ url, type: getMediaType(url) }));
   };
 
   const imageUrls = () =>
@@ -149,7 +145,7 @@ function PostDetail(props: {
     if (!c?.html) return null;
     const processed =
       props.post.type === PostType.Text
-        ? processContentHtml(c.html, getPostMediaUrls(props.post), "lightbox")
+        ? processContentHtml(c.html, getPostMediaUrls(props.post))
         : c.html;
     return sanitizeHtml(processed);
   };

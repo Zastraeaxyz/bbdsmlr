@@ -14,7 +14,6 @@ import SortDropdown from "~/components/SortDropdown";
 import {
   sanitizeHtml,
   processContentHtml,
-  transformMediaUrl,
   getMediaType,
   getPostMediaUrls,
   upgradeToLightbox,
@@ -217,8 +216,7 @@ function PostCard(props: { post: Post; onImageClick?: (url: string) => void }) {
   };
 
   const mediaItems = (): { url: string; type: MediaType }[] => {
-    const urls = getPostMediaUrls(post).map((url) => transformMediaUrl(url));
-    return urls.map((url) => ({ url, type: getMediaType(url) }));
+    return getPostMediaUrls(post).map((url) => ({ url, type: getMediaType(url) }));
   };
 
   const imageUrls = () =>

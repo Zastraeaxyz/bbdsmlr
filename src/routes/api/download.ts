@@ -1,6 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { zip } from "fflate";
-import { transformMediaUrl } from "~/lib/sanitize";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -26,7 +25,7 @@ export async function GET(event: APIEvent) {
     });
   }
 
-  const url = transformMediaUrl(rawUrl);
+  const url = rawUrl;
 
   try {
     const response = await fetch(url, { headers: FETCH_HEADERS });
@@ -116,7 +115,7 @@ export async function POST(event: APIEvent) {
   }
 
   const rawUrls = body.urls?.filter((u) => typeof u === "string" && u.length > 0) ?? [];
-  const urls = rawUrls.map(transformMediaUrl);
+  const urls = rawUrls;
   if (urls.length === 0) {
     return errorResponse("No URLs provided", 400);
   }

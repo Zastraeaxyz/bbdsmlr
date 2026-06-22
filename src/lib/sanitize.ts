@@ -83,15 +83,13 @@ export function getPostMediaUrls(post: { mediaRepresentation?: MediaRepresentati
 export function processContentHtml(
   html: string,
   urls?: string[],
-  size: string = "feed",
 ): string {
   if (!urls || urls.length === 0) return html;
 
   const fileMap = new Map<string, string>();
   for (const url of urls) {
-    const transformed = transformMediaUrl(url, size);
-    const filename = transformed.split("/").pop()?.split("?")[0];
-    if (filename) fileMap.set(filename, transformed);
+    const filename = url.split("/").pop()?.split("?")[0];
+    if (filename) fileMap.set(filename, url);
   }
 
   return html.replace(
