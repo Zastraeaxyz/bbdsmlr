@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Login session cookies now persist correctly** — The API proxy now strips the `Domain` attribute from `Set-Cookie` headers returned by BDSMLR's login endpoint. Previously, the cookie was rejected by the browser because its domain (`bdsmlr.com`) didn't match the app domain. You can now sign in and access protected blogs that require authentication.
 - **Images and videos display again after API format change** — BDSMLR moved media URLs from `content.files` into a new `mediaRepresentation` field. Posts now read images and videos from the new structure, using the signed `original.url` directly instead of rewriting through a proxy that broke the signatures.
 - **Cursor-based pagination on home feed** — The home page now uses page tokens (`nextPageToken`) for both tag search and following feed, matching the liked page behavior. Load more is no longer limited to the initial search page; the following feed also supports incremental loading.
 - **Page token persisted in URL** — After loading a subsequent page, the next page token is stored as a `?page_token=` query parameter on the home feed and liked posts pages. Reloading or bookmarking resumes from that page. The first page leaves the URL clean.

@@ -51,7 +51,12 @@ async function proxy(event: APIEvent) {
       lower !== "content-length" &&
       lower !== "transfer-encoding"
     ) {
-      clean.headers.set(key, value);
+      if (lower === "set-cookie") {
+        const cleaned = value.replace(/;\s*domain=[^;]*/gi, "");
+        clean.headers.append(key, cleaned);
+      } else {
+        clean.headers.set(key, value);
+      }
     }
   }
 
