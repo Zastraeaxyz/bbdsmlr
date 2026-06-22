@@ -25,6 +25,7 @@ import {
   processContentHtml,
   transformMediaUrl,
   getMediaType,
+  getPostMediaUrls,
   upgradeToLightbox,
   type MediaType,
 } from "~/lib/sanitize";
@@ -440,20 +441,8 @@ function PostCard(props: {
   };
 
   const mediaItems = (): { url: string; type: MediaType }[] => {
-    const media = post.content;
-    if (!media) return [];
-
-    const sourceUrls: string[] =
-      media.files && media.files.length > 0
-        ? media.files
-        : media.thumbnail
-          ? [media.thumbnail]
-          : [];
-
-    return sourceUrls.map((url) => ({
-      url: transformMediaUrl(url),
-      type: getMediaType(url),
-    }));
+    const urls = getPostMediaUrls(post).map((url) => transformMediaUrl(url));
+    return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
   const imageUrls = () =>
@@ -466,7 +455,7 @@ function PostCard(props: {
     if (!c?.html) return null;
     const processed =
       post.type === PostType.Text
-        ? processContentHtml(c.html, c.files)
+        ? processContentHtml(c.html, getPostMediaUrls(post))
         : c.html;
     return sanitizeHtml(processed);
   };

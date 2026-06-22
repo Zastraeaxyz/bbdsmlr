@@ -144,14 +144,23 @@ export const SortOrder = {
 } as const
 
 export interface PostContent {
-  files?: string[]
-  thumbnail?: string
   html?: string
   text?: string
   title?: string
   url?: string
   quoteText?: string
   quoteSource?: string
+}
+
+export interface MediaRepresentationItem {
+  kind?: number
+  original?: { url?: string }
+  alternates?: { url?: string }[]
+}
+
+export interface MediaRepresentation {
+  kind?: number
+  items?: MediaRepresentationItem[]
 }
 
 export interface Post {
@@ -162,6 +171,7 @@ export interface Post {
   title?: string
   body?: string
   content?: PostContent
+  mediaRepresentation?: MediaRepresentation
   tags?: string[]
   likesCount?: number
   commentsCount?: number

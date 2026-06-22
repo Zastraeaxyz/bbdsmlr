@@ -8,6 +8,7 @@ import {
   processContentHtml,
   transformMediaUrl,
   getMediaType,
+  getPostMediaUrls,
   upgradeToLightbox,
   type MediaType,
 } from "~/lib/sanitize";
@@ -132,14 +133,9 @@ function PostDetail(props: {
   };
 
   const mediaItems = (): { url: string; type: MediaType }[] => {
-    const c = props.post.content;
-    if (!c) return [];
-    const urls =
-      c.files && c.files.length > 0
-        ? c.files.map((u) => transformMediaUrl(u, "lightbox"))
-        : c.thumbnail
-          ? [transformMediaUrl(c.thumbnail, "lightbox")]
-          : [];
+    const urls = getPostMediaUrls(props.post).map((u) =>
+      transformMediaUrl(u, "lightbox"),
+    );
     return urls.map((url) => ({ url, type: getMediaType(url) }));
   };
 
@@ -153,7 +149,7 @@ function PostDetail(props: {
     if (!c?.html) return null;
     const processed =
       props.post.type === PostType.Text
-        ? processContentHtml(c.html, c.files, "lightbox")
+        ? processContentHtml(c.html, getPostMediaUrls(props.post), "lightbox")
         : c.html;
     return sanitizeHtml(processed);
   };

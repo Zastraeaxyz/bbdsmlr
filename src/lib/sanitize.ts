@@ -1,3 +1,5 @@
+import type { MediaRepresentation } from "~/lib/api";
+
 export type MediaType = "image" | "video";
 
 export function getMediaType(url: string): MediaType {
@@ -70,15 +72,23 @@ export function sanitizeHtml(html: string): string {
   return cleaned;
 }
 
+export function getPostMediaUrls(post: { mediaRepresentation?: MediaRepresentation }): string[] {
+  const items = post.mediaRepresentation?.items
+  if (!items || items.length === 0) return []
+  return items
+    .map((item) => item.original?.url)
+    .filter((url): url is string => !!url)
+}
+
 export function processContentHtml(
   html: string,
-  files?: string[],
+  urls?: string[],
   size: string = "feed",
 ): string {
-  if (!files || files.length === 0) return html;
+  if (!urls || urls.length === 0) return html;
 
   const fileMap = new Map<string, string>();
-  for (const url of files) {
+  for (const url of urls) {
     const transformed = transformMediaUrl(url, size);
     const filename = transformed.split("/").pop()?.split("?")[0];
     if (filename) fileMap.set(filename, transformed);
