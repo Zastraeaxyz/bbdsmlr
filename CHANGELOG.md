@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Smarter API response caching** — The API proxy now sets different `Cache-Control` durations per endpoint. Stable lookups like `resolve-identifier` are cached for up to a day, blog metadata for an hour, and feed/search endpoints for 60 seconds. Auth and signed-URL requests are never cached.
 - **Following graph cached in localStorage** — When you log in, all blog IDs you follow are fetched (all pages) and cached locally. The home feed now uses this cache instead of re-fetching the graph, and the cache refreshes when you visit your own following page.
 
 ### Fixed
